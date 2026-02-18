@@ -31,13 +31,13 @@
                 <Button Content="Client" Margin="0,0,0,10"/>
 
                 <TextBlock Text="Network Tests" FontWeight="SemiBold" Margin="0,5,0,5"/>
-                <Button Content="Throughput Test" Margin="0,0,0,5"/>
+                <Button Content="Throughput Test" Margin="0,0,0,5" Command="{Binding OpenThroughputCommand}" />
             </StackPanel>
         </Border>
 
         <!-- WORKSPACE -->
         <Border Grid.Row="0" Grid.Column="1" Background="White">
-            <TextBlock Text="Select a module"
+            <TextBlock Text="{Binding SelectedModuleTitle}"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Center"
                    FontSize="18"
@@ -53,7 +53,7 @@
             BorderThickness="0"
             FontFamily="Consolas"
             IsReadOnly="True"
-            Text="Console initialized..."
+            Text="{Binding ConsoleText}"
             TextWrapping="Wrap"
             VerticalScrollBarVisibility="Auto"
             Padding="10"/>
