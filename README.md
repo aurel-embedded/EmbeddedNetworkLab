@@ -9,4 +9,4 @@ Diagnostic & Validation Tool for Embedded Network Development
 - (future) HTTP Server
 
 ## Target
-Windows (.NET 8, WinForms)
+Windows (.NET 8, WPF)
