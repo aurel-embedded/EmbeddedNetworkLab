@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core.Services;
 using System.Windows;
 
-namespace EmbeddedNetworkLab.UI.ViewModels.Modules
+namespace EmbeddedNetworkLab.UI.Modules.Throughput
 {
 	public partial class ThroughputViewModel : ModuleViewModel
 	{

@@ -2,11 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core.Services;
 using EmbeddedNetworkLab.Infrastructure.Services;
+using EmbeddedNetworkLab.UI.Modules;
+using EmbeddedNetworkLab.UI.Modules.Throughput;
 using System.Windows;
 
 
 
-namespace EmbeddedNetworkLab.UI.ViewModel
+namespace EmbeddedNetworkLab.UI.Shell
 {
 	public partial class MainViewModel : ObservableObject
 	{
@@ -32,11 +34,14 @@ namespace EmbeddedNetworkLab.UI.ViewModel
 		[ObservableProperty]
 		private string consoleText = "Console initialized...";
 
+		[ObservableProperty]
+		private ModuleViewModel currentModule;
+
 		[RelayCommand]
 		private void OpenThroughput()
 		{
-			AppendLog("Throughput test started");
-			_throughputService.Start();
+			CurrentModule = new ThroughputViewModel(_throughputService);
+			AppendLog(CurrentModule.Name + " selected");
 		}
 
 		// Method to append log messages to the console

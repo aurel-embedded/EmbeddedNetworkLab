@@ -1,4 +1,4 @@
-﻿<Window x:Class="EmbeddedNetworkLab.UI.MainWindow"
+﻿<Window x:Class="EmbeddedNetworkLab.UI.Shell.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -37,11 +37,7 @@
 
         <!-- WORKSPACE -->
         <Border Grid.Row="0" Grid.Column="1" Background="White">
-            <TextBlock Text="{Binding SelectedModuleTitle}"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"
-                   FontSize="18"
-                   Foreground="Gray"/>
+            <ContentControl Content="{Binding CurrentModule}" />
         </Border>
 
         <!-- CONSOLE -->

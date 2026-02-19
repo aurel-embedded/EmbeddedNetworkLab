@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace EmbeddedNetworkLab.UI.ViewModels
+namespace EmbeddedNetworkLab.UI.Modules
 {
 	public abstract partial class ModuleViewModel : ObservableObject
 	{
