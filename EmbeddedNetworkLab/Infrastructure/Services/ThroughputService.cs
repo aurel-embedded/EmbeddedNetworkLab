@@ -20,7 +20,7 @@ namespace EmbeddedNetworkLab.Infrastructure.Services
 
 				while (_running)
 				{
-					await Task.Delay(1000);
+					await Task.Delay(200);
 					RateUpdated?.Invoke(rnd.NextDouble() * 100);
 				}
 			});
