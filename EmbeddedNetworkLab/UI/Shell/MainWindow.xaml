@@ -41,7 +41,7 @@
                 <TextBlock Text="Modules" FontWeight="Bold" Margin="0,0,0,10"/>
 
                 <TextBlock Text="MQTT" FontWeight="SemiBold" Margin="0,5,0,5"/>
-                <Button Content="Broker" Margin="0,0,0,5"/>
+                <Button Content="Broker" Margin="0,0,0,5" Command="{Binding OpenMqttBrokerCommand}"/>
                 <Button Content="Client" Margin="0,0,0,10"/>
 
                 <TextBlock Text="Network Tests" FontWeight="SemiBold" Margin="0,5,0,5"/>

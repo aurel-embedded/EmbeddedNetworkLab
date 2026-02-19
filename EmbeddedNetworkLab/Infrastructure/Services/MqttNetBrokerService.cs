@@ -1,11 +1,10 @@
-﻿using MqttManager.Core;
-using MQTTnet;
+﻿using MQTTnet;
 using MQTTnet.Diagnostics.Logger;
 using MQTTnet.Server;
 using MQTTnet.Server.Internal.Adapter;
 using System.Net;
 
-namespace MqttManager.Infrastructure
+namespace EmbeddedNetworkLab.Core
 {
 
 	//------------------------------------------------------------------------------
