@@ -19,12 +19,14 @@
             <TextBlock Text="Port:" VerticalAlignment="Center"/>
             <TextBox Width="80"
                  Margin="5,0"
-                 Text="{Binding BrokerPort}"/>
+                 Text="{Binding BrokerPort}"
+                 IsEnabled="{Binding IsConfigurationEditable}"/>
 
             <TextBlock Text="Bind IP:" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <ComboBox Width="150"
                   ItemsSource="{Binding NetworkInterfaces}"
-                  SelectedItem="{Binding SelectedBindIp}"/>
+                  SelectedItem="{Binding SelectedBindIp}"
+                  IsEnabled="{Binding IsConfigurationEditable}"/>
 
             <TextBlock Text="User:" Margin="10,0,0,0"/>
             <TextBox Width="100"

@@ -32,6 +32,8 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 		[ObservableProperty]
 		private string brokerStatus = "Stopped";
 
+		public bool IsConfigurationEditable => !IsRunning;
+
 		public MqttBrokerViewModel(IMqttBrokerService brokerService)
 		{
 			_brokerService = brokerService;
@@ -92,11 +94,12 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 		}
         private bool CanStop() => IsRunning;
 
-        protected override void OnRunningStateChanged(bool isRunning)
+		protected override void OnRunningStateChanged(bool isRunning)
 		{
 			StartCommand.NotifyCanExecuteChanged();
 			StopCommand.NotifyCanExecuteChanged();
-        }
+			OnPropertyChanged(nameof(IsConfigurationEditable));
+		}
 
 		private void LoadNetworkInterfaces()
 		{
