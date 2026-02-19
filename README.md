@@ -10,3 +10,7 @@ Diagnostic & Validation Tool for Embedded Network Development
 
 ## Target
 Windows (.NET 8, WPF)
+
+
+Documentation: [Project Wiki](https://github.com/aurel-embedded/EmbeddedNetworkLab/wiki)
+
