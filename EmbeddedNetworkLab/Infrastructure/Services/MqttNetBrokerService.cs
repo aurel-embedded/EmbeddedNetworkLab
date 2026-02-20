@@ -89,13 +89,19 @@ namespace EmbeddedNetworkLab.Core
 			// Track client connections
 			_server.ClientConnectedAsync += args =>
 			{
-				BrokerEventTriggered?.Invoke(this, new BrokerEvent(DateTime.Now, BrokerEventLevel.Info, $"[CONNECT] Client {args.ClientId}"));
+				BrokerEventTriggered?.Invoke(this, new BrokerEvent(	DateTime.Now, 
+																	BrokerEventLevel.Info,
+																	BrokerEventCategory.System,
+																	$"[CONNECT] Client {args.ClientId}"));
 				return Task.CompletedTask;
 			};
 
 			_server.ClientDisconnectedAsync += args =>
 			{
-				BrokerEventTriggered?.Invoke(this, new BrokerEvent(DateTime.Now, BrokerEventLevel.Info, $"[DISCONNECT] Client {args.ClientId}"));
+				BrokerEventTriggered?.Invoke(this, new BrokerEvent(	DateTime.Now, 
+																	BrokerEventLevel.Info,
+																	BrokerEventCategory.System,
+																	$"[DISCONNECT] Client {args.ClientId}"));
 				return Task.CompletedTask;
 			};
 

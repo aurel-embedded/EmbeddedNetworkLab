@@ -7,6 +7,39 @@
              xmlns:core="clr-namespace:EmbeddedNetworkLab.Core.Logging"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+
+        <!-- TEMPLATE SYSTEM -->
+        <DataTemplate x:Key="SystemEventTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
+                       Width="80"/>
+                <TextBlock Text="{Binding Level}"
+                       Width="70"
+                       Margin="5,0"/>
+                <TextBlock Text="{Binding Message}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- TEMPLATE MESSAGE -->
+        <DataTemplate x:Key="MessageEventTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
+                       Width="80"/>
+                <TextBlock Text="{Binding Message}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- SELECTOR -->
+        <local:BrokerEventTemplateSelector
+        x:Key="BrokerEventSelector"
+        SystemTemplate="{StaticResource SystemEventTemplate}"
+        MessageTemplate="{StaticResource MessageEventTemplate}" />
+
+    </UserControl.Resources>
+
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -53,53 +86,46 @@
         </StackPanel>
 
         <!-- EVENTS -->
-        <GroupBox Grid.Row="2" Header="Events" Margin="0,0,0,10">
-            <ListBox ItemsSource="{Binding BrokerEventsView}" Height="120">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Setter Property="TextElement.Foreground" Value="Black"/>
+        <GroupBox Grid.Row="2" Header="System" Margin="0,0,0,10">
+            <ListBox ItemsSource="{Binding BrokerEventsView}"
+                ItemTemplateSelector="{StaticResource BrokerEventSelector}"
+                Height="120">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Foreground" Value="Black"/>
 
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Info}">
-                                            <Setter Property="TextElement.Foreground" Value="DodgerBlue"/>
-                                        </DataTrigger>
-                                        
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Warning}">
-                                            <Setter Property="TextElement.Foreground" Value="DarkOrange"/>
-                                        </DataTrigger>
+                        <Style.Triggers>
 
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Error}">
-                                            <Setter Property="TextElement.Foreground" Value="Red"/>
-                                        </DataTrigger>
+                            <DataTrigger Binding="{Binding Level}"
+                         Value="{x:Static core:BrokerEventLevel.Info}">
+                                <Setter Property="Foreground" Value="DodgerBlue"/>
+                            </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Debug}">
-                                            <Setter Property="TextElement.Foreground" Value="Gray"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
+                            <DataTrigger Binding="{Binding Level}"
+                         Value="{x:Static core:BrokerEventLevel.Warning}">
+                                <Setter Property="Foreground" Value="DarkOrange"/>
+                            </DataTrigger>
 
-                            <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
-                           Width="80"/>
+                            <DataTrigger Binding="{Binding Level}"
+                         Value="{x:Static core:BrokerEventLevel.Error}">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
 
-                            <TextBlock Text="{Binding Level}"
-                           Width="70"
-                           Margin="5,0"/>
+                            <DataTrigger Binding="{Binding Level}"
+                         Value="{x:Static core:BrokerEventLevel.Debug}">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </DataTrigger>
 
-                            <TextBlock Text="{Binding Message}" />
-
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
             </ListBox>
         </GroupBox>
 
         <!-- MESSAGES -->
         <GroupBox Grid.Row="3" Header="Messages">
-            <ListBox ItemsSource="{Binding BrokerMessages}"/>
+            <ListBox ItemsSource="{Binding BrokerMessagesView}"
+                ItemTemplateSelector="{StaticResource BrokerEventSelector}"/>
         </GroupBox>
     </Grid>
 </UserControl>
