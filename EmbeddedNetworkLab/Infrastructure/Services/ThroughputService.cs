@@ -1,6 +1,6 @@
 ﻿
 
-using EmbeddedNetworkLab.Core.Services;
+using EmbeddedNetworkLab.Core;
 
 namespace EmbeddedNetworkLab.Infrastructure.Services
 {

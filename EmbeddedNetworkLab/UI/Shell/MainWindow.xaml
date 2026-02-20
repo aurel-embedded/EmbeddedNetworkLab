@@ -4,14 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EmbeddedNetworkLab"
-        xmlns:vm="clr-namespace:EmbeddedNetworkLab.UI.Modules.Throughput"
-        xmlns:views="clr-namespace:EmbeddedNetworkLab.UI.Modules.Throughput"    
+        xmlns:vmThroughput="clr-namespace:EmbeddedNetworkLab.UI.Modules.Throughput"
+        xmlns:viewThroughput="clr-namespace:EmbeddedNetworkLab.UI.Modules.Throughput"
+        xmlns:vmMqtt="clr-namespace:EmbeddedNetworkLab.UI.Modules.MqttBroker"
+        xmlns:viewMqtt="clr-namespace:EmbeddedNetworkLab.UI.Modules.MqttBroker"
         mc:Ignorable="d"
         Title="Embedded Network Lab" Height="916" Width="865">
     
     <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:ThroughputViewModel}">
-            <views:ThroughputView />
+        <DataTemplate DataType="{x:Type vmThroughput:ThroughputViewModel}">
+            <viewThroughput:ThroughputView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmMqtt:MqttBrokerViewModel}">
+            <viewMqtt:MqttBrokerView />
         </DataTemplate>
     </Window.Resources>
     
@@ -36,7 +41,7 @@
                 <TextBlock Text="Modules" FontWeight="Bold" Margin="0,0,0,10"/>
 
                 <TextBlock Text="MQTT" FontWeight="SemiBold" Margin="0,5,0,5"/>
-                <Button Content="Broker" Margin="0,0,0,5"/>
+                <Button Content="Broker" Margin="0,0,0,5" Command="{Binding OpenMqttBrokerCommand}"/>
                 <Button Content="Client" Margin="0,0,0,10"/>
 
                 <TextBlock Text="Network Tests" FontWeight="SemiBold" Margin="0,5,0,5"/>

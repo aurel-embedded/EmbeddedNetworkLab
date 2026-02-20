@@ -1,6 +1,6 @@
 ﻿
 
-namespace EmbeddedNetworkLab.Core.Services
+namespace EmbeddedNetworkLab.Core
 {
 	public interface IThroughputService
 	{

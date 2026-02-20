@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EmbeddedNetworkLab.Core.Services;
+using EmbeddedNetworkLab.Core;
 using System.Windows;
 
 namespace EmbeddedNetworkLab.UI.Modules.Throughput

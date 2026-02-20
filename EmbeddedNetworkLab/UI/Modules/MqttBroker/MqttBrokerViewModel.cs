@@ -1,0 +1,141 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using EmbeddedNetworkLab.Core;
+using EmbeddedNetworkLab.Core.Logging;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Data;
+
+namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
+{
+
+	public partial class MqttBrokerViewModel : ModuleViewModel
+	{
+		private readonly IMqttBrokerService _brokerService;
+
+		private long _eventCounter;
+
+		public override string Name => "MQTT Broker";
+
+		public ObservableCollection<string> NetworkInterfaces { get; } = new();
+		public ObservableCollection<string> BrokerMessages { get; } = new();
+		public ObservableCollection<BrokerEvent> BrokerEvents { get; } = new();
+
+		public ICollectionView BrokerEventsView { get; }
+
+
+		[ObservableProperty]
+		private int brokerPort = 1883;
+
+		[ObservableProperty]
+		private string? selectedBindIp;
+
+		[ObservableProperty]
+		private string? brokerUsername;
+
+		[ObservableProperty]
+		private string? brokerPassword;
+
+		[ObservableProperty]
+		private string brokerStatus = "Stopped";
+
+		public bool IsConfigurationEditable => !IsRunning;
+
+		public MqttBrokerViewModel(IMqttBrokerService brokerService)
+		{
+			_brokerService = brokerService;
+
+			_brokerService.MessageIntercepted += (s, msg) =>
+			{
+				Application.Current.Dispatcher.Invoke(() =>
+					BrokerMessages.Add(msg));
+			};
+
+			_brokerService.BrokerEventTriggered += (s, evt) =>
+			{
+				Application.Current.Dispatcher.Invoke(() =>
+					BrokerEvents.Add(evt));
+			};
+
+			BrokerEventsView = CollectionViewSource.GetDefaultView(BrokerEvents);
+
+			BrokerEventsView.SortDescriptions.Add(
+						new SortDescription(nameof(BrokerEvent.Timestamp),
+						ListSortDirection.Descending));
+
+			LoadNetworkInterfaces();
+		}
+
+		[RelayCommand(CanExecute = nameof(CanStart))]
+		private async Task Start()
+		{
+			if (!TryStart())
+				return;
+
+			string? bindIp = SelectedBindIp == "0.0.0.0"
+				? null
+				: SelectedBindIp;
+
+			await _brokerService.StartAsync(
+				BrokerPort,
+				bindIp,
+				BrokerUsername,
+				BrokerPassword);
+
+			if (_brokerService.IsRunning)
+			{
+				var addresses = string.Join(", ", _brokerService.ListeningAddresses);
+				BrokerStatus = $"Running (on {addresses})";
+			}
+			else
+			{
+				BrokerStatus = "Failed";
+				StopExecution();
+			}
+		}
+		private bool CanStart() => !IsRunning;
+
+		[RelayCommand(CanExecute = nameof(CanStop))]
+		private async Task Stop()
+		{
+			await _brokerService.StopAsync();
+			BrokerStatus = "Stopped";
+			StopExecution();
+
+			BrokerMessages.Clear();
+			BrokerEvents.Clear();
+		}
+        private bool CanStop() => IsRunning;
+
+		protected override void OnRunningStateChanged(bool isRunning)
+		{
+			StartCommand.NotifyCanExecuteChanged();
+			StopCommand.NotifyCanExecuteChanged();
+			OnPropertyChanged(nameof(IsConfigurationEditable));
+		}
+
+		private void LoadNetworkInterfaces()
+		{
+			NetworkInterfaces.Clear();
+
+			NetworkInterfaces.Add("0.0.0.0");
+
+			var ips = System.Net.NetworkInformation.NetworkInterface
+				.GetAllNetworkInterfaces()
+				.Where(ni =>
+					ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+					ni.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+				.SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
+				.Where(ip => ip.Address.AddressFamily ==
+							 System.Net.Sockets.AddressFamily.InterNetwork)
+				.Select(ip => ip.Address.ToString())
+				.Distinct();
+
+			foreach (var ip in ips)
+				NetworkInterfaces.Add(ip);
+
+			SelectedBindIp = NetworkInterfaces.FirstOrDefault();
+		}
+	}
+}
