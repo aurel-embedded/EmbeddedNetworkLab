@@ -41,9 +41,33 @@ namespace EmbeddedNetworkLab.UI.Modules.Throughput
 			return !IsRunning;
 		}
 
+		[RelayCommand(CanExecute = nameof(CanStop))]
+		private void Stop()
+		{
+			_service.Stop();
+			StopExecution();
+			CurrentRate = 0d;
+		}
+		private bool CanStop()
+		{
+			return IsRunning;
+		}
+
+		[RelayCommand]
+		private void Toggle()
+		{
+			if (IsRunning)
+				Stop();
+			else
+				Start();
+		}
+		public string StartStopLabel => IsRunning ? "Stop" : "Start";
+
 		protected override void OnRunningStateChanged(bool isRunning)
 		{
 			StartCommand.NotifyCanExecuteChanged();
+			StopCommand.NotifyCanExecuteChanged();
+			OnPropertyChanged(nameof(StartStopLabel));
 		}
 	}
 }

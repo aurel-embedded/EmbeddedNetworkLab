@@ -19,10 +19,11 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 		public override string Name => "MQTT Broker";
 
 		public ObservableCollection<string> NetworkInterfaces { get; } = new();
-		public ObservableCollection<string> BrokerMessages { get; } = new();
+		public ObservableCollection<BrokerEvent> BrokerMessages { get; } = new();
 		public ObservableCollection<BrokerEvent> BrokerEvents { get; } = new();
 
 		public ICollectionView BrokerEventsView { get; }
+		public ICollectionView BrokerMessagesView { get; }
 
 
 		[ObservableProperty]
@@ -49,7 +50,7 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 			_brokerService.MessageIntercepted += (s, msg) =>
 			{
 				Application.Current.Dispatcher.Invoke(() =>
-					BrokerMessages.Add(msg));
+					BrokerMessages.Add(new BrokerEvent(DateTime.Now, BrokerEventLevel.Info, BrokerEventCategory.Message, msg)));
 			};
 
 			_brokerService.BrokerEventTriggered += (s, evt) =>
@@ -61,6 +62,12 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 			BrokerEventsView = CollectionViewSource.GetDefaultView(BrokerEvents);
 
 			BrokerEventsView.SortDescriptions.Add(
+						new SortDescription(nameof(BrokerEvent.Timestamp),
+						ListSortDirection.Descending));
+
+			BrokerMessagesView = CollectionViewSource.GetDefaultView(BrokerMessages);
+
+			BrokerMessagesView.SortDescriptions.Add(
 						new SortDescription(nameof(BrokerEvent.Timestamp),
 						ListSortDirection.Descending));
 
@@ -106,7 +113,7 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 			BrokerMessages.Clear();
 			BrokerEvents.Clear();
 		}
-        private bool CanStop() => IsRunning;
+		private bool CanStop() => IsRunning;
 
 		protected override void OnRunningStateChanged(bool isRunning)
 		{
@@ -136,6 +143,19 @@ namespace EmbeddedNetworkLab.UI.Modules.MqttBroker
 				NetworkInterfaces.Add(ip);
 
 			SelectedBindIp = NetworkInterfaces.FirstOrDefault();
+		}
+
+
+		[RelayCommand]
+		private void ClearSystemEvents()
+		{
+			BrokerEvents.Clear();
+		}
+
+		[RelayCommand]
+		private void ClearMessageEvents()
+		{
+			BrokerMessages.Clear();
 		}
 	}
 }

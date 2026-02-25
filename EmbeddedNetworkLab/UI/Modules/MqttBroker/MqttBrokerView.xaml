@@ -5,8 +5,43 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EmbeddedNetworkLab.UI.Modules.MqttBroker"
              xmlns:core="clr-namespace:EmbeddedNetworkLab.Core.Logging"
+             xmlns:behaviors="clr-namespace:EmbeddedNetworkLab.UI.Behaviors"
+             xmlns:validation="clr-namespace:EmbeddedNetworkLab.UI.Validation"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+
+        <!-- TEMPLATE SYSTEM -->
+        <DataTemplate x:Key="SystemEventTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
+                       Width="80"/>
+                <TextBlock Text="{Binding Level}"
+                       Width="70"
+                       Margin="5,0"/>
+                <TextBlock Text="{Binding Message}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- TEMPLATE MESSAGE -->
+        <DataTemplate x:Key="MessageEventTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
+                       Width="80"/>
+                <TextBlock Text="{Binding Message}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- SELECTOR -->
+        <local:BrokerEventTemplateSelector
+        x:Key="BrokerEventSelector"
+        SystemTemplate="{StaticResource SystemEventTemplate}"
+        MessageTemplate="{StaticResource MessageEventTemplate}" />
+
+    </UserControl.Resources>
+
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,8 +55,15 @@
             <TextBlock Text="Port:" VerticalAlignment="Center"/>
             <TextBox Width="80"
                  Margin="5,0"
-                 Text="{Binding BrokerPort}"
-                 IsEnabled="{Binding IsConfigurationEditable}"/>
+                 IsEnabled="{Binding IsConfigurationEditable}">
+                <TextBox.Text>
+                    <Binding Path="BrokerPort" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <validation:PortRangeValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
 
             <TextBlock Text="Bind IP:" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <ComboBox Width="150"
@@ -31,11 +73,15 @@
 
             <TextBlock Text="User:" Margin="10,0,0,0"/>
             <TextBox Width="100"
-                 Text="{Binding BrokerUsername}"/>
+                 Text="{Binding BrokerUsername}"
+                 IsEnabled="{Binding IsConfigurationEditable}"/>
 
             <TextBlock Text="Pass:" Margin="10,0,0,0"/>
             <PasswordBox x:Name="PwdBox"
-                     Width="100"/>
+                     Width="100"
+                     IsEnabled="{Binding IsConfigurationEditable}"
+                     behaviors:PasswordBoxAssistant.BindPassword="True"
+                     behaviors:PasswordBoxAssistant.BoundPassword="{Binding BrokerPassword, Mode=TwoWay}"/>
         </StackPanel>
 
         <!-- CONTROLS -->
@@ -54,52 +100,89 @@
 
         <!-- EVENTS -->
         <GroupBox Grid.Row="2" Header="Events" Margin="0,0,0,10">
-            <ListBox ItemsSource="{Binding BrokerEventsView}" Height="120">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Setter Property="TextElement.Foreground" Value="Black"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Info}">
-                                            <Setter Property="TextElement.Foreground" Value="DodgerBlue"/>
-                                        </DataTrigger>
-                                        
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Warning}">
-                                            <Setter Property="TextElement.Foreground" Value="DarkOrange"/>
-                                        </DataTrigger>
+                <!-- Top bar -->
+                <DockPanel Grid.Row="0" 
+                        Margin="0,0,0,5">
+                    <Button DockPanel.Dock="Right"
+                            Content="✕"
+                            ToolTip="Clear events"
+                            Width="22"
+                            Height="22"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            Command="{Binding ClearSystemEventsCommand}"/>
+                </DockPanel>
 
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Error}">
-                                            <Setter Property="TextElement.Foreground" Value="Red"/>
-                                        </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding Level}" Value="{x:Static core:BrokerEventLevel.Debug}">
-                                            <Setter Property="TextElement.Foreground" Value="Gray"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
+                <!-- List -->
+                <ListBox Grid.Row="1"
+                     ItemsSource="{Binding BrokerEventsView}"
+                     ItemTemplateSelector="{StaticResource BrokerEventSelector}"
+                     Height="120"
+                     Margin="0,5,0,0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Foreground" Value="Black"/>
 
-                            <TextBlock Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
-                           Width="80"/>
+                            <Style.Triggers>
 
-                            <TextBlock Text="{Binding Level}"
-                           Width="70"
-                           Margin="5,0"/>
+                                <DataTrigger Binding="{Binding Level}"
+                                             Value="{x:Static core:BrokerEventLevel.Info}">
+                                    <Setter Property="Foreground" Value="DodgerBlue"/>
+                                </DataTrigger>
 
-                            <TextBlock Text="{Binding Message}" />
+                                <DataTrigger Binding="{Binding Level}"
+                                             Value="{x:Static core:BrokerEventLevel.Warning}">
+                                    <Setter Property="Foreground" Value="DarkOrange"/>
+                                </DataTrigger>
 
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                <DataTrigger Binding="{Binding Level}"
+                                             Value="{x:Static core:BrokerEventLevel.Error}">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Level}"
+                                             Value="{x:Static core:BrokerEventLevel.Debug}">
+                                    <Setter Property="Foreground" Value="Gray"/>
+                                </DataTrigger>
+
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
         </GroupBox>
 
         <!-- MESSAGES -->
         <GroupBox Grid.Row="3" Header="Messages">
-            <ListBox ItemsSource="{Binding BrokerMessages}"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" 
+                           Margin="0,0,0,5">
+                    <Button DockPanel.Dock="Right"
+                        Content="✕"
+                        ToolTip="Clear messages"
+                        Width="22"
+                        Height="22"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ClearMessageEventsCommand}"/>
+                </DockPanel>
+
+                <ListBox Grid.Row="1"
+                 ItemsSource="{Binding BrokerMessagesView}"
+                 ItemTemplateSelector="{StaticResource BrokerEventSelector}"/>
+            </Grid>
         </GroupBox>
     </Grid>
 </UserControl>

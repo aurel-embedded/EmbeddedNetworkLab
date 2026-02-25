@@ -13,10 +13,16 @@ namespace EmbeddedNetworkLab.Core.Logging
 		Error,
 		Debug
 	}
+	public enum BrokerEventCategory
+	{
+		System,
+		Message
+	}
 
 	public sealed record BrokerEvent(
 		DateTime Timestamp,
 		BrokerEventLevel Level,
+		BrokerEventCategory Category,
 		string Message
 	);
 }
