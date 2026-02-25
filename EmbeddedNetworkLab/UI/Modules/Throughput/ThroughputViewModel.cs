@@ -14,6 +14,11 @@ namespace EmbeddedNetworkLab.UI.Modules.Throughput
 		[ObservableProperty]
 		private double currentRate;
 
+		[ObservableProperty]
+		private string? targetAddress = "127.0.0.1";
+
+		public bool IsConfigurationEditable => !IsRunning;
+
 		public ThroughputViewModel(IThroughputService service)
 		{
 			_service = service;
@@ -68,6 +73,7 @@ namespace EmbeddedNetworkLab.UI.Modules.Throughput
 			StartCommand.NotifyCanExecuteChanged();
 			StopCommand.NotifyCanExecuteChanged();
 			OnPropertyChanged(nameof(StartStopLabel));
+			OnPropertyChanged(nameof(IsConfigurationEditable));
 		}
 	}
 }

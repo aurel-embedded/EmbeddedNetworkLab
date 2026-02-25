@@ -15,6 +15,13 @@
                    FontSize="18"
                    Margin="0,0,0,15"/>
 
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10" VerticalAlignment="Center">
+                <TextBlock Text="Target IP:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox Width="200"
+                         Text="{Binding TargetAddress, UpdateSourceTrigger=PropertyChanged}" 
+                         IsEnabled="{Binding IsConfigurationEditable}"/>
+            </StackPanel>
+            
             <TextBlock Text="{Binding CurrentRate, StringFormat=Throughput: {0:F2} Mbps}"
                    FontSize="24"
                    FontWeight="Bold"
