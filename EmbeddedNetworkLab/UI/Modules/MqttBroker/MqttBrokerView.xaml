@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EmbeddedNetworkLab.UI.Modules.MqttBroker"
              xmlns:core="clr-namespace:EmbeddedNetworkLab.Core.Logging"
+             xmlns:behaviors="clr-namespace:EmbeddedNetworkLab.UI.Behaviors"
+             xmlns:validation="clr-namespace:EmbeddedNetworkLab.UI.Validation"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -53,8 +55,15 @@
             <TextBlock Text="Port:" VerticalAlignment="Center"/>
             <TextBox Width="80"
                  Margin="5,0"
-                 Text="{Binding BrokerPort}"
-                 IsEnabled="{Binding IsConfigurationEditable}"/>
+                 IsEnabled="{Binding IsConfigurationEditable}">
+                <TextBox.Text>
+                    <Binding Path="BrokerPort" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnExceptions="True" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <validation:PortRangeValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
 
             <TextBlock Text="Bind IP:" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <ComboBox Width="150"
@@ -64,11 +73,15 @@
 
             <TextBlock Text="User:" Margin="10,0,0,0"/>
             <TextBox Width="100"
-                 Text="{Binding BrokerUsername}"/>
+                 Text="{Binding BrokerUsername}"
+                 IsEnabled="{Binding IsConfigurationEditable}"/>
 
             <TextBlock Text="Pass:" Margin="10,0,0,0"/>
             <PasswordBox x:Name="PwdBox"
-                     Width="100"/>
+                     Width="100"
+                     IsEnabled="{Binding IsConfigurationEditable}"
+                     behaviors:PasswordBoxAssistant.BindPassword="True"
+                     behaviors:PasswordBoxAssistant.BoundPassword="{Binding BrokerPassword, Mode=TwoWay}"/>
         </StackPanel>
 
         <!-- CONTROLS -->
