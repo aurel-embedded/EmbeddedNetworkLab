@@ -51,10 +51,14 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		private readonly DispatcherTimer _saveTimer;
 		private readonly string _commandsFilePath;
 
+		// persistence helper
+		private readonly CommandStore _commandStore;
+
 		public SimulatorCentraleViewModel()
 		{
 			// path next to executable
 			_commandsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "simulator_centrale_commands.json");
+			_commandStore = new CommandStore(_commandsFilePath);
 
 			// Populate common baud rates
 			var commonBauds = new[]
@@ -146,43 +150,35 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			public override string ToString() => Name;
 		}
 
-		// DTO for JSON persistence
+		// DTO for JSON persistence (kept for local use)
 		private record CommandDto(string Name, string Text);
 
-		// --- Persistence methods (JSON) ---
+		// --- Persistence methods (JSON) using CommandStore ---
 
 		private void LoadCommandItems()
 		{
+			// if file missing: create default (save will create)
 			if (!File.Exists(_commandsFilePath))
 			{
-				// create default file (will be created on first save)
 				_ = SaveCommandItemsAsync();
 				return;
 			}
 
-			try
-			{
-				var json = File.ReadAllText(_commandsFilePath);
-				var values = JsonSerializer.Deserialize<CommandDto[]?>(json) ?? Array.Empty<CommandDto>();
+			var values = _commandStore.Load();
 
-				// apply values to existing CommandItems (up to count)
-				for (int i = 0; i < CommandItems.Count; i++)
-				{
-					if (i < values.Length)
-					{
-						CommandItems[i].Name = values[i].Name ?? CommandItems[i].Name;
-						CommandItems[i].Text = values[i].Text ?? string.Empty;
-					}
-					else
-					{
-						// if missing in file, keep defaults
-						CommandItems[i].Text = string.Empty;
-					}
-				}
-			}
-			catch (Exception ex)
+			// apply values to existing CommandItems (up to count)
+			for (int i = 0; i < CommandItems.Count; i++)
 			{
-				EmitLog($"[ERROR] reading commands file: {ex.Message}");
+				if (i < values.Length)
+				{
+					CommandItems[i].Name = values[i].Name ?? CommandItems[i].Name;
+					CommandItems[i].Text = values[i].Text ?? string.Empty;
+				}
+				else
+				{
+					// if missing in file, keep defaults
+					CommandItems[i].Text = string.Empty;
+				}
 			}
 		}
 
@@ -190,17 +186,12 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		{
 			try
 			{
-				var values = CommandItems.Select(ci => new CommandDto(ci.Name ?? string.Empty, ci.Text ?? string.Empty)).ToArray();
-				var json = JsonSerializer.Serialize(values, new JsonSerializerOptions { WriteIndented = true });
-
-				// atomic-ish write: write temp then move
-				var tmp = _commandsFilePath + ".tmp";
-				await File.WriteAllTextAsync(tmp, json);
-				// overwrite destination
-				File.Move(tmp, _commandsFilePath, overwrite: true);
+				var dtos = CommandItems.Select(ci => new CommandStore.CommandDto(ci.Name ?? string.Empty, ci.Text ?? string.Empty)).ToArray();
+				await _commandStore.SaveAsync(dtos).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
+				// ensure errors are logged to shell console
 				EmitLog($"[ERROR] saving commands file: {ex.Message}");
 			}
 		}
