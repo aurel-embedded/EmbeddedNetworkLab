@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Modules;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -45,8 +47,15 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		private SerialPort? _serialPort;
 		private readonly DispatcherTimer _portScanTimer;
 
+		// Save debounce timer (1s) and file path
+		private readonly DispatcherTimer _saveTimer;
+		private readonly string _commandsFilePath;
+
 		public SimulatorCentraleViewModel()
 		{
+			// path next to executable
+			_commandsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "simulator_centrale_commands.json");
+
 			// Populate common baud rates
 			var commonBauds = new[]
 			{
@@ -59,12 +68,30 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 
 			SelectedBaud = 460800;
 
-			// Create 10 command items
+			// Create 10 command items and subscribe to changes
 			for (int i = 0; i < 10; i++)
 			{
-				var ci = new CommandItem { Text = string.Empty, Index = i };
+				var ci = new CommandItem { Name = $"Cmd {i + 1}", Text = string.Empty, Index = i };
 				ci.PropertyChanged += CommandItem_PropertyChanged;
 				CommandItems.Add(ci);
+			}
+
+			// Debounced save timer
+			_saveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+			_saveTimer.Tick += (_, __) =>
+			{
+				_saveTimer.Stop();
+				_ = SaveCommandItemsAsync();
+			};
+
+			// Load saved commands (or create default file)
+			try
+			{
+				LoadCommandItems();
+			}
+			catch (Exception ex)
+			{
+				EmitLog($"[ERROR] loading commands file: {ex.Message}");
 			}
 
 			RefreshSerialPorts();
@@ -77,16 +104,26 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			_portScanTimer.Start();
 		}
 
-		// Called when a command item's Text changes -> refresh SendCommand can execute
+		// Called when a command item's Text or Name changes -> schedule Save
 		private void CommandItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == nameof(CommandItem.Text))
+			if (e.PropertyName == nameof(CommandItem.Text) || e.PropertyName == nameof(CommandItem.Name))
+			{
+				// restart debounce timer
+				_saveTimer.Stop();
+				_saveTimer.Start();
+
+				// refresh Send command availability
 				SendCommand.NotifyCanExecuteChanged();
+			}
 		}
 
 		// Command item model
 		public partial class CommandItem : ObservableObject
 		{
+			[ObservableProperty]
+			private string? name;
+
 			[ObservableProperty]
 			private string? text;
 
@@ -108,6 +145,67 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			[ObservableProperty] private bool isUsable;
 			public override string ToString() => Name;
 		}
+
+		// DTO for JSON persistence
+		private record CommandDto(string Name, string Text);
+
+		// --- Persistence methods (JSON) ---
+
+		private void LoadCommandItems()
+		{
+			if (!File.Exists(_commandsFilePath))
+			{
+				// create default file (will be created on first save)
+				_ = SaveCommandItemsAsync();
+				return;
+			}
+
+			try
+			{
+				var json = File.ReadAllText(_commandsFilePath);
+				var values = JsonSerializer.Deserialize<CommandDto[]?>(json) ?? Array.Empty<CommandDto>();
+
+				// apply values to existing CommandItems (up to count)
+				for (int i = 0; i < CommandItems.Count; i++)
+				{
+					if (i < values.Length)
+					{
+						CommandItems[i].Name = values[i].Name ?? CommandItems[i].Name;
+						CommandItems[i].Text = values[i].Text ?? string.Empty;
+					}
+					else
+					{
+						// if missing in file, keep defaults
+						CommandItems[i].Text = string.Empty;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				EmitLog($"[ERROR] reading commands file: {ex.Message}");
+			}
+		}
+
+		private async Task SaveCommandItemsAsync()
+		{
+			try
+			{
+				var values = CommandItems.Select(ci => new CommandDto(ci.Name ?? string.Empty, ci.Text ?? string.Empty)).ToArray();
+				var json = JsonSerializer.Serialize(values, new JsonSerializerOptions { WriteIndented = true });
+
+				// atomic-ish write: write temp then move
+				var tmp = _commandsFilePath + ".tmp";
+				await File.WriteAllTextAsync(tmp, json);
+				// overwrite destination
+				File.Move(tmp, _commandsFilePath, overwrite: true);
+			}
+			catch (Exception ex)
+			{
+				EmitLog($"[ERROR] saving commands file: {ex.Message}");
+			}
+		}
+
+		// --- existing serial-port / command logic (unchanged aside from minor integration) ---
 
 		// Refresh ports (keeps missing items grayed)
 		public void RefreshSerialPorts()
@@ -285,7 +383,6 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			}
 		}
 
-		// Incoming data handler: simple example that feeds StatusText (UI thread)
 		private void SerialPort_DataReceived(object? sender, SerialDataReceivedEventArgs e)
 		{
 			try
@@ -302,7 +399,6 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 					StatusText = incoming.Length > 200 ? incoming[..200] + "…" : incoming;
 				}));
 
-				// Also emit the raw incoming data to shell console
 				EmitLog(incoming);
 			}
 			catch (Exception ex)
