@@ -52,7 +52,7 @@
 
         <!-- CONFIG -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Port:" VerticalAlignment="Center"/>
+            <TextBlock Text="Port: " VerticalAlignment="Center"/>
             <TextBox Width="80"
                  Margin="5,0"
                  IsEnabled="{Binding IsConfigurationEditable}">
@@ -65,18 +65,18 @@
                 </TextBox.Text>
             </TextBox>
 
-            <TextBlock Text="Bind IP:" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <TextBlock Text="Bind IP: " VerticalAlignment="Center" Margin="10,0,0,0"/>
             <ComboBox Width="150"
                   ItemsSource="{Binding NetworkInterfaces}"
                   SelectedItem="{Binding SelectedBindIp}"
                   IsEnabled="{Binding IsConfigurationEditable}"/>
 
-            <TextBlock Text="User:" Margin="10,0,0,0"/>
+            <TextBlock Text="User: " Margin="10,0,0,0"/>
             <TextBox Width="100"
                  Text="{Binding BrokerUsername}"
                  IsEnabled="{Binding IsConfigurationEditable}"/>
 
-            <TextBlock Text="Pass:" Margin="10,0,0,0"/>
+            <TextBlock Text="Pass: " Margin="10,0,0,0"/>
             <PasswordBox x:Name="PwdBox"
                      Width="100"
                      IsEnabled="{Binding IsConfigurationEditable}"

@@ -11,7 +11,7 @@
         xmlns:vmSerial="clr-namespace:EmbeddedNetworkLab.UI.Modules.Serial"
         xmlns:viewSerial="clr-namespace:EmbeddedNetworkLab.UI.Modules.Serial"
         mc:Ignorable="d"
-        Title="Embedded Network Lab" Height="1000" Width="1500">
+        Title="Embedded Network Lab" Height="800" Width="1000">
 
     <Window.Resources>
         <DataTemplate DataType="{x:Type vmThroughput:ThroughputViewModel}">
@@ -41,7 +41,7 @@
             <!-- Workspace -->
             <ColumnDefinition Width="*" />
             <!-- Serial links column -->
-            <ColumnDefinition Width="520" />
+            <!-- <ColumnDefinition Width="520" /> -->
         </Grid.ColumnDefinitions>
 
         <!-- NAVIGATION PANEL -->
@@ -64,18 +64,19 @@
         </Border>
 
         <!-- SERIAL LINKS COLUMN -->
+        <!-- 
         <Border Grid.Row="0" Grid.Column="2" Background="#FAFAFA" Padding="8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Single serial -->
                 <Border Grid.Column="0" Margin="4" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
                     <ContentControl Content="{Binding LeftSerial}" />
                 </Border>
             </Grid>
         </Border>
+       </-->
 
         <!-- CONSOLE -->
         <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
