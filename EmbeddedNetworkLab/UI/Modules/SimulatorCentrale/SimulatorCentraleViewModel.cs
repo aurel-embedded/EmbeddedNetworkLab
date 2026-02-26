@@ -35,7 +35,8 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		private bool isPortOpen;
 
 		public bool IsConfigurationEditable => !IsPortOpen;
-		public string ToggleLabel => IsPortOpen ? "Close" : "Open";
+		// Toggle label now follows IsRunning
+		public string ToggleLabel => IsRunning ? "Close" : "Open";
 
 		// Commands area: 10 command items
 		public ObservableCollection<CommandItem> CommandItems { get; } = new();
@@ -198,33 +199,59 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 
 		// --- existing serial-port / command logic (unchanged aside from minor integration) ---
 
-		// Refresh ports (keeps missing items grayed)
-		public void RefreshSerialPorts()
-		{
-			var current = SerialPort.GetPortNames().OrderBy(p => p).ToArray();
-			var known = SerialPortItems.ToDictionary(i => i.Name, i => i);
+		// Refresh ports (keeps missing items grayed) and preserve selection when possible
+        public void RefreshSerialPorts()
+        {
+            var previousName = SelectedPortItem?.Name;
 
-			foreach (var item in SerialPortItems)
-			{
-				item.Present = false;
-				item.IsUsable = false;
-			}
+            var current = SerialPort.GetPortNames().OrderBy(p => p).ToArray();
+            var existingDict = SerialPortItems.ToDictionary(i => i.Name, i => i);
 
-			foreach (var name in current)
-			{
-				if (known.TryGetValue(name, out var existing))
-				{
-					existing.Present = true;
-				}
-				else
-				{
-					var it = new SerialPortItem(name) { Present = true, IsUsable = false };
-					SerialPortItems.Add(it);
-				}
-			}
+            // Update existing items' Present flag only when it changes (avoid transient false)
+            foreach (var item in SerialPortItems)
+            {
+                var isNowPresent = current.Contains(item.Name);
+                if (item.Present != isNowPresent)
+                {
+                    Application.Current?.Dispatcher.BeginInvoke(new Action(() => item.Present = isNowPresent));
+                }
+            }
 
-			_ = ScanPortsAsync();
-		}
+            // Add any new ports
+            foreach (var name in current)
+            {
+                if (!existingDict.ContainsKey(name))
+                {
+                    var it = new SerialPortItem(name) { Present = true, IsUsable = false };
+                    Application.Current?.Dispatcher.BeginInvoke(new Action(() => SerialPortItems.Add(it)));
+                }
+            }
+
+            // Try to restore previous selection if still present
+            if (!string.IsNullOrWhiteSpace(previousName))
+            {
+                var restored = SerialPortItems.FirstOrDefault(i => i.Name == previousName && i.Present);
+                if (restored != null)
+                {
+                    SelectedPortItem = restored;
+                    // request a usability scan for the selected item immediately
+                    _ = Task.Run(async () =>
+                    {
+                        var usable = await TestPortUsableAsync(restored.Name, SelectedBaud);
+                        Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            restored.IsUsable = usable;
+                            ToggleCommand.NotifyCanExecuteChanged();
+                        }));
+                    });
+                    return;
+                }
+            }
+
+            // if no previous to restore, pick first present (usability will be determined by ScanPortsAsync)
+            SelectedPortItem = SerialPortItems.FirstOrDefault(i => i.Present);
+            _ = ScanPortsAsync();
+        }
 
 		[RelayCommand]
 		private void RefreshPorts() => RefreshSerialPorts();
@@ -232,21 +259,29 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		private async Task ScanPortsAsync()
 		{
 			var currentNames = SerialPort.GetPortNames().OrderBy(n => n).ToArray();
-			var existingDict = SerialPortItems.ToDictionary(i => i.Name, i => i);
 
-			foreach (var item in SerialPortItems)
-				item.Present = false;
+			// Safe snapshot: tolerate existing duplicates by choosing first
+			var existingDict = SerialPortItems
+				.GroupBy(i => i.Name)
+				.ToDictionary(g => g.Key, g => g.First());
 
 			foreach (var name in currentNames)
 			{
 				if (!existingDict.TryGetValue(name, out var it))
 				{
-					it = new SerialPortItem(name) { Present = true, IsUsable = false };
-					Application.Current?.Dispatcher.BeginInvoke(new Action(() => SerialPortItems.Add(it)));
+					// Perform check+add atomically on UI thread to avoid races
+					Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+					{
+						if (!SerialPortItems.Any(i => i.Name == name))
+						{
+							SerialPortItems.Add(new SerialPortItem(name) { Present = true, IsUsable = false });
+						}
+					}));
 				}
 				else
 				{
-					Application.Current?.Dispatcher.BeginInvoke(new Action(() => it.Present = true));
+					if (!it.Present)
+						Application.Current?.Dispatcher.BeginInvoke(new Action(() => it.Present = true));
 				}
 
 				_ = Task.Run(async () =>
@@ -255,20 +290,30 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 					Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
 					{
 						var item = SerialPortItems.FirstOrDefault(i => i.Name == name);
-						if (item != null)
+						if (item != null && item.IsUsable != usable)
+						{
 							item.IsUsable = usable;
+							ToggleCommand.NotifyCanExecuteChanged();
+						}
 					}));
 				});
 			}
 
-			foreach (var item in SerialPortItems.Where(i => !currentNames.Contains(i.Name)).ToArray())
-			{
-				Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
-				{
-					item.Present = false;
-					item.IsUsable = false;
-				}));
-			}
+            // For items not present in currentNames, ensure IsUsable=false and Present=false and notify toggle
+            foreach (var item in SerialPortItems.Where(i => !currentNames.Contains(i.Name)).ToArray())
+            {
+                Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (item.Present)
+                        item.Present = false;
+                    if (item.IsUsable)
+                        item.IsUsable = false;
+                    ToggleCommand.NotifyCanExecuteChanged();
+                }));
+            }
+
+            // after a scan completes, ensure the toggle state is recomputed
+            Application.Current?.Dispatcher.BeginInvoke(new Action(() => ToggleCommand.NotifyCanExecuteChanged()));
 		}
 
 		private static Task<bool> TestPortUsableAsync(string portName, int baud)
@@ -293,18 +338,18 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			});
 		}
 
-		// Toggle open/close serial port
+		// Toggle command: execute based on IsRunning now
 		[RelayCommand(CanExecute = nameof(CanToggle))]
 		private void Toggle()
 		{
-			if (IsPortOpen)
+			if (IsRunning)
 				PerformClose();
 			else
 				PerformOpen();
 		}
 
 		private bool CanToggle() =>
-			IsPortOpen || (SelectedPortItem != null && SelectedPortItem.Present && SelectedPortItem.IsUsable && !IsRunning);
+			IsRunning || (SelectedPortItem != null && SelectedPortItem.Present && SelectedPortItem.IsUsable && !IsRunning);
 
 		private void PerformOpen()
 		{
@@ -402,10 +447,9 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 
 		partial void OnIsPortOpenChanged(bool value)
 		{
-			ToggleCommand.NotifyCanExecuteChanged();
+			// keep Send availability and configuration notifications
 			SendCommand.NotifyCanExecuteChanged();
 			OnPropertyChanged(nameof(IsConfigurationEditable));
-			OnPropertyChanged(nameof(ToggleLabel));
 		}
 
 		partial void OnSelectedPortItemChanged(SerialPortItem? value)
@@ -416,9 +460,13 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 
 		protected override void OnRunningStateChanged(bool isRunning)
 		{
+			// Update command availability and label when running state changes
 			ToggleCommand.NotifyCanExecuteChanged();
 			SendCommand.NotifyCanExecuteChanged();
 			OnPropertyChanged(nameof(StatusText));
+			OnPropertyChanged(nameof(ToggleLabel));
+
+			// Ensure the port is closed when stopping the module
 			if (!isRunning)
 				CloseSerialPort();
 		}
