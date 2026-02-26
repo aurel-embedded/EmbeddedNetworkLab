@@ -8,9 +8,11 @@
         xmlns:viewThroughput="clr-namespace:EmbeddedNetworkLab.UI.Modules.Throughput"
         xmlns:vmMqtt="clr-namespace:EmbeddedNetworkLab.UI.Modules.MqttBroker"
         xmlns:viewMqtt="clr-namespace:EmbeddedNetworkLab.UI.Modules.MqttBroker"
+        xmlns:vmSerial="clr-namespace:EmbeddedNetworkLab.UI.Modules.Serial"
+        xmlns:viewSerial="clr-namespace:EmbeddedNetworkLab.UI.Modules.Serial"
         mc:Ignorable="d"
-        Title="Embedded Network Lab" Height="916" Width="865">
-    
+        Title="Embedded Network Lab" Height="800" Width="1000">
+
     <Window.Resources>
         <DataTemplate DataType="{x:Type vmThroughput:ThroughputViewModel}">
             <viewThroughput:ThroughputView />
@@ -18,11 +20,16 @@
         <DataTemplate DataType="{x:Type vmMqtt:MqttBrokerViewModel}">
             <viewMqtt:MqttBrokerView />
         </DataTemplate>
+
+        <!-- Template for Serial views -->
+        <DataTemplate DataType="{x:Type vmSerial:SerialViewModel}">
+            <viewSerial:SerialView />
+        </DataTemplate>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Ligne principale -->
+            <!-- Main area (navigation, workspace, serial side-by-side) -->
             <RowDefinition Height="*" />
             <!-- Console -->
             <RowDefinition Height="150" />
@@ -33,6 +40,8 @@
             <ColumnDefinition Width="220" />
             <!-- Workspace -->
             <ColumnDefinition Width="*" />
+            <!-- Serial links column -->
+            <!-- <ColumnDefinition Width="520" /> -->
         </Grid.ColumnDefinitions>
 
         <!-- NAVIGATION PANEL -->
@@ -54,23 +63,35 @@
             <ContentControl Content="{Binding CurrentModule}" />
         </Border>
 
+        <!-- SERIAL LINKS COLUMN -->
+        <!-- 
+        <Border Grid.Row="0" Grid.Column="2" Background="#FAFAFA" Padding="8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Margin="4" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
+                    <ContentControl Content="{Binding LeftSerial}" />
+                </Border>
+            </Grid>
+        </Border>
+       </-->
+
         <!-- CONSOLE -->
-        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
             Background="#1E1E1E">
             <TextBox 
-            Foreground="LightGreen"
-            Background="#1E1E1E"
-            BorderThickness="0"
-            FontFamily="Consolas"
-            IsReadOnly="True"
-            Text="{Binding ConsoleText}"
-            TextWrapping="Wrap"
-            VerticalScrollBarVisibility="Auto"
-            Padding="10"
-            AcceptsReturn="True"/>
+                Foreground="LightGreen"
+                Background="#1E1E1E"
+                BorderThickness="0"
+                FontFamily="Consolas"
+                IsReadOnly="True"
+                Text="{Binding ConsoleText}"
+                TextWrapping="Wrap"
+                VerticalScrollBarVisibility="Auto"
+                Padding="10"
+                AcceptsReturn="True"/>
         </Border>
     </Grid>
 </Window>
-
-
-    
