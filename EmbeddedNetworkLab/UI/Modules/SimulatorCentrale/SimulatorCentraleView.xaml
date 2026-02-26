@@ -36,15 +36,11 @@
                         <Style TargetType="ComboBoxItem">
                             <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="IsEnabled" Value="True"/>
-
                             <Style.Triggers>
-                                <!-- If not present, grey & disable -->
                                 <DataTrigger Binding="{Binding Present}" Value="False">
                                     <Setter Property="Foreground" Value="Gray"/>
                                     <Setter Property="IsEnabled" Value="False"/>
                                 </DataTrigger>
-
-                                <!-- If not usable, grey & disable -->
                                 <DataTrigger Binding="{Binding IsUsable}" Value="False">
                                     <Setter Property="Foreground" Value="Gray"/>
                                     <Setter Property="IsEnabled" Value="False"/>
@@ -53,7 +49,6 @@
                         </Style>
                     </ComboBox.ItemContainerStyle>
                 </ComboBox>
-                <!-- Small refresh button -->
                 <Button Content="⟳"
                         ToolTip="Refresh ports"
                         Command="{Binding RefreshPortsCommand}"
@@ -79,33 +74,47 @@
             <TextBlock Text="{Binding IsRunning, StringFormat='Running: {0}'}" Margin="12,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <!-- Main area: configuration / output -->
+        <!-- Main area: Commands / output -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Configuration (placeholders for future bindings) -->
-            <GroupBox Header="Configuration" Margin="0,0,12,0">
-                <StackPanel Margin="8">
-                    <TextBlock Text="Parameter A" />
-                    <TextBox IsEnabled="True" />
-                    <TextBlock Text="Parameter B" Margin="0,8,0,0"/>
-                    <TextBox IsEnabled="True"/>
-                </StackPanel>
+            <!-- Commands: 10 pairs TextBox + Button -->
+            <GroupBox Header="Commands" Margin="0,0,12,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="360">
+                    <ItemsControl ItemsSource="{Binding CommandItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,4">
+                                    <TextBox Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="260" Margin="0,0,8,0" />
+                                    <Button Content="Send"
+                                            Command="{Binding DataContext.SendCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Width="80"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </GroupBox>
 
             <!-- Output / simulator log -->
-            <GroupBox Grid.Column="1" Header="Output" Margin="0">
+            <GroupBox Grid.Column="1" Header="Reception" Margin="0">
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="41*"/>
+                        <ColumnDefinition Width="23*"/>
+                    </Grid.ColumnDefinitions>
                     <TextBox Text="{Binding StatusText}" 
                              IsReadOnly="True" 
                              TextWrapping="Wrap" 
                              VerticalScrollBarVisibility="Auto"
                              Background="White" 
                              BorderThickness="0" 
-                             Padding="8"/>
+                             Padding="8" Grid.ColumnSpan="2"/>
                 </Grid>
             </GroupBox>
         </Grid>
