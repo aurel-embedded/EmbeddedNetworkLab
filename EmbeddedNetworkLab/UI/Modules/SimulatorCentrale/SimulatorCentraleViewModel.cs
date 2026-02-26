@@ -15,9 +15,9 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		public override string Name => "Central Simulator";
 
 		[ObservableProperty]
-		private string? statusText = "Ready";
+		private string? statusText = "";
 
-		// Collection of port items exposed for binding (contains availability info)
+		// Collections exposed for binding
 		public ObservableCollection<SerialPortItem> SerialPortItems { get; } = new();
 		public ObservableCollection<int> BaudRates { get; } = new();
 
@@ -37,8 +37,14 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 		// Label for the toggle button ("Open" or "Close")
 		public string ToggleLabel => IsPortOpen ? "Close" : "Open";
 
+		// Event used to emit raw log messages to the shell (no timestamp)
+		public event EventHandler<string>? LogEmitted;
+
 		private SerialPort? _serialPort;
 		private readonly DispatcherTimer _portScanTimer;
+
+		// Helper to emit logs
+		private void EmitLog(string message) => LogEmitted?.Invoke(this, message);
 
 		public SimulatorCentraleViewModel()
 		{
@@ -228,7 +234,7 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			// Open the serial port first
 			if (SelectedPortItem == null || string.IsNullOrWhiteSpace(SelectedPortItem.Name))
 			{
-				StatusText = "Select a serial port before opening.";
+				EmitLog("Select a serial port before opening.");
 				return;
 			}
 
@@ -246,7 +252,9 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			}
 			catch (Exception ex)
 			{
-				StatusText = $"Failed to open port {SelectedPortItem.Name}: {ex.Message}";
+				var msg = $"Failed to open port {SelectedPortItem.Name}: {ex.Message}";
+				EmitLog(msg);
+				// cleanup...
 				if (_serialPort != null)
 				{
 					try { _serialPort.DataReceived -= SerialPort_DataReceived; } catch { }
@@ -261,15 +269,20 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 			if (!TryStart())
 				return;
 
-			StatusText = $"Running on {SelectedPortItem.Name} @ {SelectedBaud}";
+			var runningMsg = $"Running on {SelectedPortItem.Name} @ {SelectedBaud}";
+			EmitLog(runningMsg);
 		}
 
 		// Helper: close port and stop module
 		private void PerformClose()
 		{
+			// Stop module logic
 			StopExecution();
+
+			// Close the serial port cleanly if open
 			CloseSerialPort();
-			StatusText = "Closed";
+
+			EmitLog("Closed");
 		}
 
 		private void CloseSerialPort()
@@ -314,13 +327,18 @@ namespace EmbeddedNetworkLab.UI.Modules.SimulatorCentrale
 				{
 					StatusText = incoming.Length > 200 ? incoming[..200] + "…" : incoming;
 				}));
+
+				// Also emit the raw incoming data to shell console
+				EmitLog(incoming);
 			}
 			catch (Exception ex)
 			{
+				var err = $"[ERROR reading serial port: {ex.Message}]";
 				Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
 				{
-					StatusText = $"[ERROR reading serial port: {ex.Message}]";
+					StatusText = err;
 				}));
+				EmitLog(err);
 			}
 		}
 
