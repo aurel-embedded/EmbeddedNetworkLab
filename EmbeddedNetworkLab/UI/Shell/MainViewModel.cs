@@ -6,6 +6,7 @@ using EmbeddedNetworkLab.Modules;
 using EmbeddedNetworkLab.UI.Modules.MqttBroker;
 using EmbeddedNetworkLab.UI.Modules.Throughput;
 using EmbeddedNetworkLab.UI.Modules.Serial;
+using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
 
 
 
@@ -18,6 +19,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 		private readonly ThroughputViewModel _throughputModule;
 		private readonly MqttBrokerViewModel _mqttBrokerModule;
+		private readonly SimulatorCentraleViewModel _simulatorCentraleModule;
 
 		private readonly SerialViewModel _leftSerialModel;
 
@@ -29,6 +31,8 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 			_mqttBrokerService = new MqttNetBrokerService();
 			_mqttBrokerModule = new MqttBrokerViewModel(_mqttBrokerService);
+
+			_simulatorCentraleModule = new SimulatorCentraleViewModel();
 
 			_leftSerialModel = new SerialViewModel { Title = "THW", SerialText = "" };
 
@@ -64,6 +68,13 @@ namespace EmbeddedNetworkLab.UI.Shell
             CurrentModule = _mqttBrokerModule;
             AppendLog(CurrentModule.Name + " selected");
         }
+
+        [RelayCommand]
+		private void OpenSimulatorCentrale()
+		{
+			CurrentModule = _simulatorCentraleModule;
+			AppendLog(CurrentModule.Name + " selected");
+		}
 
         // Method to append log messages to the console (adds its own timestamp)
         private void AppendLog(string message)
