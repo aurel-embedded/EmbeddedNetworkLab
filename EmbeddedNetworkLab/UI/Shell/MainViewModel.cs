@@ -20,7 +20,6 @@ namespace EmbeddedNetworkLab.UI.Shell
 		private readonly MqttBrokerViewModel _mqttBrokerModule;
 
 		private readonly SerialViewModel _leftSerialModel;
-		private readonly SerialViewModel _rightSerialModel;
 
 
         public MainViewModel()
@@ -31,15 +30,12 @@ namespace EmbeddedNetworkLab.UI.Shell
 			_mqttBrokerService = new MqttNetBrokerService();
 			_mqttBrokerModule = new MqttBrokerViewModel(_mqttBrokerService);
 
-			_leftSerialModel = new SerialViewModel { Title = "Serial A", SerialText = "" };
-			_rightSerialModel = new SerialViewModel { Title = "Serial B", SerialText = "" };
+			_leftSerialModel = new SerialViewModel { Title = "THW", SerialText = "" };
 
 			// Subscribe serial VM log events to the shell console.
 			_leftSerialModel.LogEmitted += (s, msg) => AppendLog(msg);
-			_rightSerialModel.LogEmitted += (s, msg) => AppendLog(msg);
 
 			LeftSerial = _leftSerialModel;
-			RightSerial = _rightSerialModel;
         }
 
 		[ObservableProperty]
@@ -51,12 +47,9 @@ namespace EmbeddedNetworkLab.UI.Shell
 		[ObservableProperty]
 		private IModule currentModule;
 
-		// Expose the two serial view models for binding in MainWindow
+		// Expose the single serial view model for binding in MainWindow
 		[ObservableProperty]
 		private SerialViewModel leftSerial;
-
-		[ObservableProperty]
-		private SerialViewModel rightSerial;
 
 		[RelayCommand]
 		private void OpenThroughput()

@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -36,6 +37,9 @@ namespace EmbeddedNetworkLab.UI.Modules.Serial
 		private bool isPortOpen;
 
 		public string TogglePortButtonText => IsPortOpen ? "Close" : "Open";
+
+		// VT100 processor (separated into its own class)
+		private readonly SerialVt100Processor _vt100Processor = new();
 
 		public SerialViewModel()
 		{
@@ -105,6 +109,7 @@ namespace EmbeddedNetworkLab.UI.Modules.Serial
 					WriteTimeout = 1000
 				};
 
+				_serialPort.DataReceived += SerialPort_DataReceived;
 				_serialPort.Open();
 				IsPortOpen = true;
 				AppendSerialLog($"Opened {SelectedPort} @ {SelectedBaud} baud.");
@@ -112,7 +117,11 @@ namespace EmbeddedNetworkLab.UI.Modules.Serial
 			catch (Exception ex)
 			{
 				AppendSerialLog($"Failed to open {SelectedPort}: {ex.Message}");
-				_serialPort?.Dispose();
+				if (_serialPort != null)
+				{
+					_serialPort.DataReceived -= SerialPort_DataReceived;
+					_serialPort.Dispose();
+				}
 				_serialPort = null;
 				IsPortOpen = false;
 			}
@@ -139,9 +148,61 @@ namespace EmbeddedNetworkLab.UI.Modules.Serial
 			}
 			finally
 			{
+				try
+				{
+					_serialPort.DataReceived -= SerialPort_DataReceived;
+				}
+				catch
+				{
+					// ignore if already removed or port disposed
+				}
+
 				_serialPort.Dispose();
 				_serialPort = null;
 				IsPortOpen = false;
+
+				// reset logical screen
+				_vt100Processor.Reset();
+				Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					SerialText = string.Empty;
+				}));
+			}
+		}
+
+		// DataReceived handler - read incoming data, process VT100 and update SerialText (UI thread).
+		private void SerialPort_DataReceived(object? sender, SerialDataReceivedEventArgs e)
+		{
+			try
+			{
+				if (sender is not SerialPort sp)
+					return;
+
+				// Read whatever is available right now
+				var incoming = sp.ReadExisting();
+				if (string.IsNullOrEmpty(incoming))
+					return;
+
+				// Process VT100 sequences and obtain the logical screen text
+				var text = _vt100Processor.Process(incoming);
+
+				// Update UI on dispatcher
+				Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					SerialText = text;
+				}));
+
+				// Emit the raw message (no timestamp) so MainViewModel can append to the console with its own timestamp.
+				AppendSerialLog(incoming);
+			}
+			catch (Exception ex)
+			{
+				// Avoid throwing from IO thread: surface error to UI/log
+				Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					SerialText += $"[ERROR reading serial port: {ex.Message}]";
+				}));
+				AppendSerialLog($"[ERROR reading serial port: {ex.Message}]");
 			}
 		}
 
