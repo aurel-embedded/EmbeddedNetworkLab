@@ -55,6 +55,9 @@
 
                 <TextBlock Text="Network Tests" FontWeight="SemiBold" Margin="0,5,0,5"/>
                 <Button Content="Throughput Test" Margin="0,0,0,5" Command="{Binding OpenThroughputCommand}"/>
+                
+                <TextBlock Text="Simulator" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                <Button Content="Centrale" Margin="0,0,0,5" Command="{Binding OpenCentralCommand}"/>
             </StackPanel>
         </Border>
 
