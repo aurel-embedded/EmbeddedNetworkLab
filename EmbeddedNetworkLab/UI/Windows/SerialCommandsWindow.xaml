@@ -86,7 +86,17 @@
         <!-- Command section: 10 rows Name + Value + Send -->
         <Border Grid.Row="1" Padding="8" Margin="0,0,0,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
             <StackPanel>
-                <TextBlock Text="Commande" FontWeight="Bold" Margin="0,0,0,8" />
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Commande" FontWeight="Bold" Grid.Column="0" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="LoadCommandsButton" Content="Load" Width="80" Margin="0,0,8,0" Click="LoadCommandsButton_Click" ToolTip="Load name/value pairs from JSON" />
+                        <Button x:Name="SaveCommandsButton" Content="Save" Width="80" Click="SaveCommandsButton_Click" ToolTip="Save name/value pairs to JSON" />
+                    </StackPanel>
+                </Grid>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="360">
                     <UniformGrid Columns="1" Rows="10" Margin="0" IsItemsHost="False">
                         <!-- Generate 10 rows manually -->
@@ -157,17 +167,25 @@
 
         <!-- Reception section -->
         <Border Grid.Row="2" Padding="8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
-            <StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+    
                 <TextBlock Text="Reception" FontWeight="Bold" Margin="0,0,0,8" />
+
                 <TextBox x:Name="ReceptionTextBox"
+                         Grid.Row="1"
                          IsReadOnly="True"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto"
                          HorizontalScrollBarVisibility="Auto"
                          VerticalAlignment="Stretch"
-                         HorizontalAlignment="Stretch"/>
-            </StackPanel>
+                         HorizontalAlignment="Stretch"
+                         MinHeight="100" />
+            </Grid>
         </Border>
     </Grid>
 </Window>

@@ -1,11 +1,15 @@
 ﻿using System;
 using System;
 using System.Linq;
+using System.IO;
 using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Globalization;
+using System.Collections.Generic;
+using System.Text.Json;
+using Microsoft.Win32;
 
 namespace EmbeddedNetworkLab.UI.Windows
 {
@@ -300,6 +304,90 @@ namespace EmbeddedNetworkLab.UI.Windows
 				var btn = FindName($"SendRowButton{i}") as Button;
 				if (btn != null)
 					btn.IsEnabled = enabled;
+			}
+		}
+
+		private void SaveCommandsButton_Click(object sender, RoutedEventArgs e)
+		{
+			var list = new List<CommandEntry>();
+			for (int i = 1; i <= 10; i++)
+			{
+				var nameBox = FindName($"NameTextBox{i}") as TextBox;
+				var valueBox = FindName($"ValueTextBox{i}") as TextBox;
+				if (nameBox == null || valueBox == null) continue;
+				var name = nameBox.Text ?? string.Empty;
+				var value = valueBox.Text ?? string.Empty;
+				list.Add(new CommandEntry { Name = name, Value = value });
+			}
+
+			var dlg = new SaveFileDialog
+			{
+				Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+				DefaultExt = "json",
+				FileName = "serial_commands.json"
+			};
+
+			if (dlg.ShowDialog(this) == true)
+			{
+				try
+				{
+					var opts = new JsonSerializerOptions { WriteIndented = true };
+					var json = JsonSerializer.Serialize(list, opts);
+					File.WriteAllText(dlg.FileName, json);
+					SetStatus($"Saved {list.Count} entries", Brushes.Green);
+				}
+				catch (Exception ex)
+				{
+					SetStatus($"Save failed: {ex.Message}", Brushes.Red);
+				}
+			}
+		}
+
+		private class CommandEntry
+		{
+			public string Name { get; set; } = string.Empty;
+			public string Value { get; set; } = string.Empty;
+		}
+
+		private void LoadCommandsButton_Click(object sender, RoutedEventArgs e)
+		{
+			var dlg = new OpenFileDialog
+			{
+				Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+				DefaultExt = "json",
+				Multiselect = false
+			};
+
+			if (dlg.ShowDialog(this) == true)
+			{
+				try
+				{
+					var json = File.ReadAllText(dlg.FileName);
+					var list = JsonSerializer.Deserialize<List<CommandEntry>>(json) ?? new List<CommandEntry>();
+
+					for (int i = 1; i <= 10; i++)
+					{
+						var nameBox = FindName($"NameTextBox{i}") as TextBox;
+						var valueBox = FindName($"ValueTextBox{i}") as TextBox;
+						if (nameBox == null || valueBox == null) continue;
+						if (i - 1 < list.Count)
+						{
+							nameBox.Text = list[i - 1].Name ?? string.Empty;
+							valueBox.Text = list[i - 1].Value ?? string.Empty;
+						}
+						else
+						{
+							nameBox.Text = string.Empty;
+							valueBox.Text = string.Empty;
+						}
+					}
+
+					SetStatus($"Loaded {list.Count} entries", Brushes.Green);
+				}
+				catch (Exception ex)
+				{
+					SetStatus($"Load failed: {ex.Message}", Brushes.Red);
+				}
 			}
 		}
 
