@@ -20,9 +20,21 @@ namespace EmbeddedNetworkLab.UI.Windows
 	{
 		private SerialPort? _serialPort;
 
+		// Config paths
+		private readonly string _appDir;
+		private readonly string _configPath;
+		private readonly string _defaultCommandsPath;
+		private AppConfig _config = new AppConfig();
+
 		public SerialCommandsWindow()
 		{
 			InitializeComponent();
+			// Use executable directory for config and commands files
+			_appDir = AppContext.BaseDirectory;
+			_configPath = Path.Combine(_appDir, "config.json");
+			_defaultCommandsPath = Path.Combine(_appDir, "serial_commands.json");
+
+			EnsureAppFilesAndLoad();
 			LoadSerialPorts();
 
 			// Ensure per-row Send buttons initial state
@@ -335,6 +347,9 @@ namespace EmbeddedNetworkLab.UI.Windows
 					var json = JsonSerializer.Serialize(list, opts);
 					File.WriteAllText(dlg.FileName, json);
 					SetStatus($"Saved {list.Count} entries", Brushes.Green);
+					// remember last used file
+					_config.LastCommandsFile = dlg.FileName;
+					SaveConfig();
 				}
 				catch (Exception ex)
 				{
@@ -347,6 +362,93 @@ namespace EmbeddedNetworkLab.UI.Windows
 		{
 			public string Name { get; set; } = string.Empty;
 			public string Value { get; set; } = string.Empty;
+		}
+
+		private class AppConfig
+		{
+			public string? LastCommandsFile { get; set; }
+		}
+
+		private void EnsureAppFilesAndLoad()
+		{
+			try
+			{
+				Directory.CreateDirectory(_appDir);
+
+				// create default commands file if missing
+				if (!File.Exists(_defaultCommandsPath))
+				{
+					var defaults = new List<CommandEntry>();
+					for (int i = 0; i < 10; i++) defaults.Add(new CommandEntry());
+					File.WriteAllText(_defaultCommandsPath, JsonSerializer.Serialize(defaults, new JsonSerializerOptions { WriteIndented = true }));
+				}
+
+				// load config if present
+				if (File.Exists(_configPath))
+				{
+					var cfgJson = File.ReadAllText(_configPath);
+					_config = JsonSerializer.Deserialize<AppConfig>(cfgJson) ?? new AppConfig();
+				}
+
+				// determine file to load: config->last file exists ? else default
+				var toLoad = !string.IsNullOrWhiteSpace(_config.LastCommandsFile) && File.Exists(_config.LastCommandsFile)
+					? _config.LastCommandsFile
+					: _defaultCommandsPath;
+
+				LoadCommandsFromPath(toLoad);
+			}
+			catch
+			{
+				// ignore errors but ensure config exists
+				SaveConfig();
+			}
+		}
+
+		private void SaveConfig()
+		{
+			try
+			{
+				Directory.CreateDirectory(_appDir);
+				File.WriteAllText(_configPath, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
+			}
+			catch
+			{
+				// ignore
+			}
+		}
+
+		private void LoadCommandsFromPath(string path)
+		{
+			try
+			{
+				var json = File.ReadAllText(path);
+				var list = JsonSerializer.Deserialize<List<CommandEntry>>(json) ?? new List<CommandEntry>();
+
+				for (int i = 1; i <= 10; i++)
+				{
+					var nameBox = FindName($"NameTextBox{i}") as TextBox;
+					var valueBox = FindName($"ValueTextBox{i}") as TextBox;
+					if (nameBox == null || valueBox == null) continue;
+					if (i - 1 < list.Count)
+					{
+						nameBox.Text = list[i - 1].Name ?? string.Empty;
+						valueBox.Text = list[i - 1].Value ?? string.Empty;
+					}
+					else
+					{
+						nameBox.Text = string.Empty;
+						valueBox.Text = string.Empty;
+					}
+				}
+
+				_config.LastCommandsFile = path;
+				SaveConfig();
+				SetStatus($"Loaded {list.Count} entries", Brushes.Green);
+			}
+			catch
+			{
+				// ignore load errors
+			}
 		}
 
 		private void LoadCommandsButton_Click(object sender, RoutedEventArgs e)
@@ -383,6 +485,9 @@ namespace EmbeddedNetworkLab.UI.Windows
 					}
 
 					SetStatus($"Loaded {list.Count} entries", Brushes.Green);
+					// remember last used file
+					_config.LastCommandsFile = dlg.FileName;
+					SaveConfig();
 				}
 				catch (Exception ex)
 				{
