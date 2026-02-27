@@ -9,6 +9,14 @@ namespace EmbeddedNetworkLab
     /// </summary>
     public partial class App : Application
     {
+        public Infrastructure.Services.IAppConfigService AppConfigService { get; private set; } = null!;
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            // initialize shared services
+            AppConfigService = new Infrastructure.Services.AppConfigService();
+        }
     }
 
 }
