@@ -68,6 +68,7 @@
                         <ComboBox x:Name="BaudrateComboBox" MinWidth="200"
                                   IsEditable="False"
                                   ToolTip="Select baud rate">
+                            <ComboBoxItem>460800</ComboBoxItem>
                             <ComboBoxItem>115200</ComboBoxItem>
                             <ComboBoxItem>57600</ComboBoxItem>
                             <ComboBoxItem>38400</ComboBoxItem>
