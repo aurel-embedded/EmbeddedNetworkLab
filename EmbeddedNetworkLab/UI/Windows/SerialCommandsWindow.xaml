@@ -1,0 +1,116 @@
+﻿<Window x:Class="EmbeddedNetworkLab.UI.Windows.SerialCommandsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EmbeddedNetworkLab.UI.Windows"
+        mc:Ignorable="d"
+        Title="SerialCommandsWindow" Height="800" Width="700">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <!-- Configuration section -->
+            <RowDefinition Height="Auto" />
+            <!-- Command section -->
+            <RowDefinition Height="Auto" />
+            <!-- Reception section (fills remaining space) -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Configuration section -->
+        <Border Grid.Row="0" Padding="8" Margin="0,0,0,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
+            <StackPanel>
+                <TextBlock Text="Configuration" FontWeight="Bold" Margin="0,0,0,8" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,12,0">
+                        <TextBlock Text="Port:" VerticalAlignment="Center" Margin="0,0,0,6"/>
+                        <TextBlock Text="Baudrate:" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <!-- Row: Port combobox + Refresh icon button -->
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox x:Name="PortComboBox"
+                                      MinWidth="200"
+                                      Grid.Column="0"
+                                      IsEditable="False"
+                                      ToolTip="Select a serial port" />
+
+                            <!-- Icon button: using a Unicode refresh glyph -->
+                            <Button x:Name="RefreshPortsButton"
+                                    Grid.Column="1"
+                                    Width="34"
+                                    Height="26"
+                                    Margin="8,0,0,0"
+                                    Click="RefreshPortsButton_Click"
+                                    ToolTip="Refresh COM ports"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Padding="0">
+                                <TextBlock Text="↻" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                        </Grid>
+
+                        <ComboBox x:Name="BaudrateComboBox" MinWidth="200"
+                                  IsEditable="False"
+                                  ToolTip="Select baud rate">
+                            <ComboBoxItem>115200</ComboBoxItem>
+                            <ComboBoxItem>57600</ComboBoxItem>
+                            <ComboBoxItem>38400</ComboBoxItem>
+                            <ComboBoxItem>19200</ComboBoxItem>
+                            <ComboBoxItem>9600</ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Right">
+                        <!-- Toggle button: text changes between Open / Close -->
+                        <Button x:Name="ConnectButton" Content="Open" Width="90" Margin="8,0,0,6" Click="ConnectButton_Click"/>
+                        <TextBlock x:Name="ConnectionStatusText" Text="Disconnected" Foreground="Red" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Command section -->
+        <Border Grid.Row="1" Padding="8" Margin="0,0,0,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
+            <StackPanel>
+                <TextBlock Text="Commande" FontWeight="Bold" Margin="0,0,0,8" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="CommandTextBox" Grid.Column="0" MinHeight="30" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <Button x:Name="SendCommandButton" Grid.Column="1" Content="Send" Width="80" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Reception section -->
+        <Border Grid.Row="2" Padding="8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
+            <StackPanel>
+                <TextBlock Text="Reception" FontWeight="Bold" Margin="0,0,0,8" />
+                <TextBox x:Name="ReceptionTextBox"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         VerticalAlignment="Stretch"
+                         HorizontalAlignment="Stretch"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

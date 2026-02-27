@@ -7,8 +7,8 @@ using EmbeddedNetworkLab.UI.Modules.MqttBroker;
 using EmbeddedNetworkLab.UI.Modules.Throughput;
 using EmbeddedNetworkLab.UI.Modules.Serial;
 using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
-
-
+using EmbeddedNetworkLab.UI.Windows;
+using System.Windows;
 
 namespace EmbeddedNetworkLab.UI.Shell
 {
@@ -79,6 +79,18 @@ namespace EmbeddedNetworkLab.UI.Shell
 		{
 			CurrentModule = _simulatorCentraleModule;
 			AppendLog("selected", _simulatorCentraleModule.Name);
+		}
+
+		// Opens the SerialCommandsWindow when the corresponding command is executed.
+		[RelayCommand]
+		private void OpenSerialCommands()
+		{
+			var win = new SerialCommandsWindow
+			{
+				Owner = Application.Current?.MainWindow
+			};
+			win.Show();
+			AppendLog("opened", "SerialCommandsWindow");
 		}
 
         // Method to append log messages to the console (adds its own timestamp).
