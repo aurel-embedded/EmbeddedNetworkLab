@@ -6,6 +6,7 @@ using EmbeddedNetworkLab.Modules;
 using EmbeddedNetworkLab.UI.Modules.MqttBroker;
 using EmbeddedNetworkLab.UI.Modules.Throughput;
 using EmbeddedNetworkLab.UI.Modules.Serial;
+using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
 
 
 
@@ -18,6 +19,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 		private readonly ThroughputViewModel _throughputModule;
 		private readonly MqttBrokerViewModel _mqttBrokerModule;
+		private readonly SimulatorCentraleViewModel _simulatorCentraleModule;
 
 		private readonly SerialViewModel _leftSerialModel;
 
@@ -30,10 +32,17 @@ namespace EmbeddedNetworkLab.UI.Shell
 			_mqttBrokerService = new MqttNetBrokerService();
 			_mqttBrokerModule = new MqttBrokerViewModel(_mqttBrokerService);
 
+			_simulatorCentraleModule = new SimulatorCentraleViewModel();
+
+			// Subscribe simulator logs to the shell console, include module name
+			_simulatorCentraleModule.LogEmitted += (s, msg) =>
+				AppendLog(msg, (s as IModule)?.Name ?? _simulatorCentraleModule.Name);
+
 			_leftSerialModel = new SerialViewModel { Title = "THW", SerialText = "" };
 
-			// Subscribe serial VM log events to the shell console.
-			_leftSerialModel.LogEmitted += (s, msg) => AppendLog(msg);
+			// Subscribe serial VM log events to the shell console, use Title as module name
+			_leftSerialModel.LogEmitted += (s, msg) =>
+				AppendLog(msg, _leftSerialModel.Title ?? "Serial");
 
 			LeftSerial = _leftSerialModel;
         }
@@ -55,20 +64,29 @@ namespace EmbeddedNetworkLab.UI.Shell
 		private void OpenThroughput()
 		{
 			CurrentModule = _throughputModule;
-			AppendLog(CurrentModule.Name + " selected");
+			AppendLog("selected", _throughputModule.Name);
 		}
 
         [RelayCommand]
         private void OpenMqttBroker()
         {
             CurrentModule = _mqttBrokerModule;
-            AppendLog(CurrentModule.Name + " selected");
+            AppendLog("selected", _mqttBrokerModule.Name);
         }
 
-        // Method to append log messages to the console (adds its own timestamp)
-        private void AppendLog(string message)
+        [RelayCommand]
+		private void OpenSimulatorCentrale()
 		{
-			ConsoleText += $"\n[{DateTime.Now:HH:mm:ss}] {message}";
+			CurrentModule = _simulatorCentraleModule;
+			AppendLog("selected", _simulatorCentraleModule.Name);
+		}
+
+        // Method to append log messages to the console (adds its own timestamp).
+        // moduleName is optional; when present it is shown as [Module].
+        private void AppendLog(string message, string? moduleName = null)
+		{
+			var modulePart = string.IsNullOrWhiteSpace(moduleName) ? "Shell" : moduleName;
+			ConsoleText += $"\n[{DateTime.Now:HH:mm:ss}] [{modulePart}] {message}";
 		}
 
 	}
