@@ -26,8 +26,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 
 		public bool IsConfigurationEditable => !IsRunning;
 
-		// New: the toggle button is enabled when running (to allow stop) OR when the port text is valid (to allow start)
-		public bool IsToggleEnabled => IsRunning || IsPortValid();
+		public bool IsCmdEnabled => IsRunning || IsPortValid();
 
 		public TcpClientViewModel(ITcpClientService service)
 		{
@@ -59,6 +58,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 
 			TargetPort = port;
 
+			_service.Configure(TargetAddress!, TargetPort);
 			_service.Start();
 		}
 
@@ -116,7 +116,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 			StartCommand.NotifyCanExecuteChanged();
 			StopCommand.NotifyCanExecuteChanged();
 			ToggleCommand.NotifyCanExecuteChanged();
-			OnPropertyChanged(nameof(IsToggleEnabled));
+			OnPropertyChanged(nameof(IsCmdEnabled));
 		}
 
 		protected override void OnRunningStateChanged(bool isRunning)
@@ -126,7 +126,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 			ToggleCommand.NotifyCanExecuteChanged();
 			OnPropertyChanged(nameof(StartStopLabel));
 			OnPropertyChanged(nameof(IsConfigurationEditable));
-			OnPropertyChanged(nameof(IsToggleEnabled));
+			OnPropertyChanged(nameof(IsCmdEnabled));
 		}
 	}
 }

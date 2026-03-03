@@ -4,11 +4,16 @@ using EmbeddedNetworkLab.Core;
 
 namespace EmbeddedNetworkLab.Infrastructure.Services
 {
-	public class ThroughputService : ITcpClientService
+	public class TcpClientServiceMock : ITcpClientService
 	{
 		public event Action<double>? RateUpdated;
 
 		private bool _running;
+
+		public void Configure(string address, int port)
+		{
+			// No configuration needed for this dummy service
+		}
 
 		public void Start()
 		{

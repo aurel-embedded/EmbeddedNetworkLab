@@ -34,9 +34,9 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 		private readonly SerialViewModel _leftSerialModel;
 
-        public MainViewModel()
+        public MainViewModel(ITcpClientService tcpClientService)
 		{
-			_tcpClientService = new ThroughputService();
+			_tcpClientService = tcpClientService;
 			_tcpClientModuleInstance = new TcpClientViewModel(_tcpClientService);
 			TcpClientModule = _tcpClientModuleInstance;
 
