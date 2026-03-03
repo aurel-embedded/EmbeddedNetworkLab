@@ -74,7 +74,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Server" VerticalAlignment="Center"/>
                         <Ellipse Width="12" Height="12" Margin="8,0,0,0" VerticalAlignment="Center"
-                                 Fill="{Binding TcpClientModule.IsRunning, Converter={StaticResource BoolToBrushConverter}}"/>
+                                 Fill="{Binding TcpServerModule.IsRunning, Converter={StaticResource BoolToBrushConverter}}"/>
                     </StackPanel>
                 </Button>
                 <Button Margin="0,0,0,5" Command="{Binding OpenTcpClientCommand}">
