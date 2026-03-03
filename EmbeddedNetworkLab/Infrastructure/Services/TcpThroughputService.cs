@@ -1,6 +1,8 @@
 ﻿using EmbeddedNetworkLab.Core;
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class TcpThroughputService : ITcpThroughputService
 {
@@ -42,6 +44,9 @@ public sealed class TcpThroughputService : ITcpThroughputService
 
 		lock (_sync)
 		{
+			if (_task == null)
+				return;
+
 			taskToWait = _task;
 			ctsToDispose = _cts;
 
@@ -49,75 +54,68 @@ public sealed class TcpThroughputService : ITcpThroughputService
 			_cts = null;
 		}
 
-		try
-		{
-			ctsToDispose?.Cancel();
-		}
-		finally
-		{
-			ctsToDispose?.Dispose();
-		}
+		ctsToDispose?.Cancel();
 
-		// Optional: wait a short time so the socket closes cleanly
-		try
+		// Do not block the caller (UI) waiting for the background task.
+		// Dispose the CTS once the background task completes.
+		if (taskToWait != null)
 		{
-			taskToWait?.Wait(500);
+			_ = taskToWait.ContinueWith(t =>
+			{
+				try
+				{
+					// Swallow exceptions from the background task; ensure observers see 0 rate.
+					RateUpdated?.Invoke(0);
+				}
+				finally
+				{
+					try { ctsToDispose?.Dispose(); } catch { }
+				}
+			}, TaskScheduler.Default);
 		}
-		catch
-		{
-			// Ignore
-		}
-
-		RateUpdated?.Invoke(0);
 	}
 
 	private async Task RunAsync(CancellationToken token)
 	{
-		string address;
-		int port;
-
-		lock (_sync)
-		{
-			address = _address;
-			port = _port;
-		}
-
 		try
 		{
 			using var client = new TcpClient();
 			client.NoDelay = true;
 
-			await client.ConnectAsync(address, port, token);
+			await client.ConnectAsync(_address, _port, token);
 
 			using NetworkStream stream = client.GetStream();
 
+			// 🔵 Tell STM32: Throughput mode
+			await stream.WriteAsync(new byte[] { 0x02 }, token);
+
 			byte[] buffer = new byte[4096];
-			Random.Shared.NextBytes(buffer);
+			new Random().NextBytes(buffer);
 
 			var sw = Stopwatch.StartNew();
+
 			long bytesSent = 0;
 			long lastBytes = 0;
-			long lastTimeMs = 0;
+			long lastTime = 0;
 
 			while (!token.IsCancellationRequested)
 			{
 				await stream.WriteAsync(buffer, token);
 				bytesSent += buffer.Length;
 
-				long nowMs = sw.ElapsedMilliseconds;
+				long currentTime = sw.ElapsedMilliseconds;
 
-				if (nowMs - lastTimeMs >= 500)
+				if (currentTime - lastTime >= 500)
 				{
 					long deltaBytes = bytesSent - lastBytes;
-					double seconds = (nowMs - lastTimeMs) / 1000.0;
+					double seconds = (currentTime - lastTime) / 1000.0;
 
 					double bytesPerSecond = deltaBytes / seconds;
-					double mbps = (bytesPerSecond * 8.0) / 1_000_000.0;
 
-					RateUpdated?.Invoke(mbps);
+					RateUpdated?.Invoke(bytesPerSecond * 8 / 1_000_000); // Mbps
 
 					lastBytes = bytesSent;
-					lastTimeMs = nowMs;
+					lastTime = currentTime;
 				}
 			}
 		}

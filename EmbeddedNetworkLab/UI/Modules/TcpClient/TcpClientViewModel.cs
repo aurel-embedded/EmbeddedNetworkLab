@@ -70,6 +70,9 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 			IsReaching = true;
 			ReachedStatus = "Reaching...";
 
+			// Add a short delay so the UI shows the "Reaching..." status before proceeding.
+			await Task.Delay(TimeSpan.FromSeconds(1));
+
 			_reachCts?.Cancel();
 			_reachCts?.Dispose();
 			_reachCts = new CancellationTokenSource();
