@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using EmbeddedNetworkLab.Core;
+using System.Configuration;
 using System.Data;
 using System.Windows;
 
@@ -9,7 +10,7 @@ namespace EmbeddedNetworkLab
     /// </summary>
     public partial class App : Application
     {
-        public Infrastructure.Services.IAppConfigService AppConfigService { get; private set; } = null!;
+        public IAppConfigService AppConfigService { get; private set; } = null!;
 
         protected override void OnStartup(StartupEventArgs e)
         {

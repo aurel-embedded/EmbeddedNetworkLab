@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using EmbeddedNetworkLab.Core.Models;
 
-namespace EmbeddedNetworkLab.Infrastructure.Services
+namespace EmbeddedNetworkLab.Core
 {
     public interface IAppConfigService
     {

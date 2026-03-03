@@ -16,7 +16,7 @@
                        HorizontalAlignment="Center"/>
 
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10" VerticalAlignment="Center">
-                <TextBlock Text="Target IP:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="TCP Server Target IP:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                 <TextBox Width="200"
                          Text="{Binding TargetAddress, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding IsConfigurationEditable}"/>
@@ -51,8 +51,8 @@
             <StackPanel Orientation="Horizontal"
                         Margin="0,0,0,10"
                         VerticalAlignment="Center">
-                <Button Content="{Binding StartStopLabel}"
-                        Command="{Binding ToggleCommand}"
+                <Button Content="{Binding StartStopThroughputLabel}"
+                        Command="{Binding StartStopThroughputCommand}"
                         IsEnabled="{Binding IsCmdEnabled}"
                         Width="120"
                         Height="30"

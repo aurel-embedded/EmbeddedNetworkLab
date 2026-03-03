@@ -39,7 +39,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 
 		public bool IsCmdEnabled => !IsReaching;
 
-		public string StartStopLabel => IsRunning ? "Stop" : "Start";
+		public string StartStopThroughputLabel => IsRunning ? "Stop Throughput Test" : "Start Throughput Test";
 
 		public TcpClientViewModel(ITcpThroughputService service, ITcpReachabilityService reachService)
 		{
@@ -150,8 +150,8 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 		//------------------------------------------------------------------------------
 		/// \brief Toggle start/stop
 		//------------------------------------------------------------------------------
-		[RelayCommand(CanExecute = nameof(CanToggle))]
-		private void Toggle()
+		[RelayCommand(CanExecute = nameof(CanStartStopThroughput))]
+		private void StartStopThroughput()
 		{
 			if (IsRunning)
 				Stop();
@@ -159,7 +159,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 				Start();
 		}
 
-		private bool CanToggle()
+		private bool CanStartStopThroughput()
 		{
 			if (IsReaching)
 				return false;
@@ -188,10 +188,10 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 		{
 			StartCommand.NotifyCanExecuteChanged();
 			StopCommand.NotifyCanExecuteChanged();
-			ToggleCommand.NotifyCanExecuteChanged();
+			StartStopThroughputCommand.NotifyCanExecuteChanged();
 			ReachedServerCommand.NotifyCanExecuteChanged();
 
-			OnPropertyChanged(nameof(StartStopLabel));
+			OnPropertyChanged(nameof(StartStopThroughputLabel));
 			OnPropertyChanged(nameof(IsConfigurationEditable));
 			OnPropertyChanged(nameof(IsCmdEnabled));
 		}
