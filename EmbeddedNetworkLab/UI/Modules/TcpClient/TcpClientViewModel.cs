@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,6 +11,8 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 {
 	public partial class TcpClientViewModel : ModuleViewModel
 	{
+		private const int HistorySeconds = 60;
+
 		private readonly ITcpThroughputService _service;
 		private readonly ITcpReachabilityService _reachService;
 
@@ -51,8 +54,12 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 				Application.Current.Dispatcher.Invoke(() =>
 				{
 					CurrentRate = rate;
+
+					var now = DateTime.Now;
+
 				});
 			};
+
 		}
 
 		//------------------------------------------------------------------------------

@@ -12,6 +12,8 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="MQTTnet" Version="5.1.0.1559" />
     <PackageReference Include="MQTTnet.Server" Version="5.1.0.1559" />
+    <PackageReference Include="ScottPlot" Version="5.1.57" />
+    <PackageReference Include="ScottPlot.WPF" Version="5.1.57" />
     <PackageReference Include="System.IO.Ports" Version="10.0.3" />
   </ItemGroup>
 
