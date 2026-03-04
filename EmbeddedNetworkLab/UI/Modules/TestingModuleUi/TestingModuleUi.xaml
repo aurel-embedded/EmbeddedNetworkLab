@@ -18,7 +18,10 @@
                        FontSize="18"
                        Margin="0,0,0,15"
                        HorizontalAlignment="Left"/>
-            <lvc:CartesianChart Height="250" Series="{Binding Series}" />
+            <lvc:CartesianChart Height="250" 
+                                Series="{Binding Series}" 
+                                XAxes="{Binding XAxes}"
+                                YAxes="{Binding YAxes}"/>
         </StackPanel>
 
     </Grid>
