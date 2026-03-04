@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -12,6 +14,12 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 	public partial class TcpClientViewModel : ModuleViewModel
 	{
 		private const int HistorySeconds = 60;
+
+		public ObservableCollection<double> ThroughputValues { get; } = new();
+
+		public ISeries[] ThroughputSeries { get; }
+
+
 
 		private readonly ITcpThroughputService _service;
 		private readonly ITcpReachabilityService _reachService;
@@ -49,17 +57,38 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 			_service = service ?? throw new ArgumentNullException(nameof(service));
 			_reachService = reachService ?? throw new ArgumentNullException(nameof(reachService));
 
+			// Seed for a non-empty chart at startup
+			for (int i = 0; i < 120; i++)
+				ThroughputValues.Add(0);
+
+			ThroughputSeries =
+			[
+				new LineSeries<double>
+			{
+				Values = ThroughputValues,
+				Fill = null,
+				GeometrySize = 0,
+				LineSmoothness = 0
+			}
+			];
+
+
 			_service.RateUpdated += rate =>
 			{
 				Application.Current.Dispatcher.Invoke(() =>
 				{
 					CurrentRate = rate;
-
-					var now = DateTime.Now;
-
 				});
 			};
 
+			_service.RateUpdated += OnRateUpdated;
+
+
+		}
+
+		public void Dispose()
+		{
+			_service.RateUpdated -= OnRateUpdated;
 		}
 
 		//------------------------------------------------------------------------------
@@ -201,6 +230,19 @@ namespace EmbeddedNetworkLab.UI.Modules.TcpClient
 			OnPropertyChanged(nameof(StartStopThroughputLabel));
 			OnPropertyChanged(nameof(IsConfigurationEditable));
 			OnPropertyChanged(nameof(IsCmdEnabled));
+		}
+		private void OnRateUpdated(double rate)
+		{
+			// Ensure UI thread (ObservableCollection)
+			Application.Current.Dispatcher.Invoke(() =>
+			{
+				const int maxPoints = 120;
+
+				ThroughputValues.Add(rate);
+
+				if (ThroughputValues.Count > maxPoints)
+					ThroughputValues.RemoveAt(0);
+			});
 		}
 
 		partial void OnTargetAddressChanged(string? value) => RefreshCommandStates();
