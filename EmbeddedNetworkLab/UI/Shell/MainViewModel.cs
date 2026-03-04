@@ -4,9 +4,10 @@ using EmbeddedNetworkLab.Core;
 using EmbeddedNetworkLab.Infrastructure.Services;
 using EmbeddedNetworkLab.Modules;
 using EmbeddedNetworkLab.UI.Modules.MqttBroker;
-using EmbeddedNetworkLab.UI.Modules.TcpClient;
 using EmbeddedNetworkLab.UI.Modules.Serial;
 using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
+using EmbeddedNetworkLab.UI.Modules.TcpClient;
+using EmbeddedNetworkLab.UI.Modules.TestingModuleUi;
 using EmbeddedNetworkLab.UI.Windows;
 using System.Windows;
 
@@ -23,6 +24,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 		private readonly TcpClientViewModel _tcpClientModuleInstance;
 		private readonly MqttBrokerViewModel _mqttBrokerModuleInstance;
 		private readonly SimulatorCentraleViewModel _simulatorCentraleModuleInstance;
+		private readonly TestingModuleUiViewModel _testingModuleInstance;
 
 		// Exposed bindable module properties (for XAML bindings)
 		[ObservableProperty]
@@ -33,6 +35,9 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 		[ObservableProperty]
 		private IModule simulatorCentraleModule;
+
+		[ObservableProperty]
+		private IModule testingModule;
 
 		private readonly SerialViewModel _leftSerialModel;
 
@@ -49,6 +54,9 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 			_simulatorCentraleModuleInstance = new SimulatorCentraleViewModel();
 			SimulatorCentraleModule = _simulatorCentraleModuleInstance;
+
+			_testingModuleInstance = new TestingModuleUiViewModel();
+			TestingModule = _testingModuleInstance;
 
 			// Subscribe simulator logs to the shell console, include module name
 			_simulatorCentraleModuleInstance.LogEmitted += (s, msg) =>
@@ -109,9 +117,16 @@ namespace EmbeddedNetworkLab.UI.Shell
 			AppendLog("opened", "SerialCommandsWindow");
 		}
 
-        // Method to append log messages to the console (adds its own timestamp).
-        // moduleName is optional; when present it is shown as [Module].
-        private void AppendLog(string message, string? moduleName = null)
+		[RelayCommand]
+		private void OpenTestingModuleUi()
+		{
+			CurrentModule = _testingModuleInstance;
+			AppendLog("selected", _testingModuleInstance.Name);
+		}
+
+		// Method to append log messages to the console (adds its own timestamp).
+		// moduleName is optional; when present it is shown as [Module].
+		private void AppendLog(string message, string? moduleName = null)
 		{
 			var modulePart = string.IsNullOrWhiteSpace(moduleName) ? "Shell" : moduleName;
 			ConsoleText += $"\n[{DateTime.Now:HH:mm:ss}] [{modulePart}] {message}";
