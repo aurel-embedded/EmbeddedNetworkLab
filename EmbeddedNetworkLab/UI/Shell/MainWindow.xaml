@@ -12,6 +12,8 @@
         xmlns:viewSerial="clr-namespace:EmbeddedNetworkLab.UI.Modules.Serial"
         xmlns:vmSimulator="clr-namespace:EmbeddedNetworkLab.UI.Modules.SimulatorCentrale"
         xmlns:viewSimulator="clr-namespace:EmbeddedNetworkLab.UI.Modules.SimulatorCentrale"
+        xmlns:vmTestingModuleUi="clr-namespace:EmbeddedNetworkLab.UI.Modules.TestingModuleUi"
+        xmlns:viewTestingModuleUi="clr-namespace:EmbeddedNetworkLab.UI.Modules.TestingModuleUi"
         xmlns:converters="clr-namespace:EmbeddedNetworkLab.UI.Converters"
         mc:Ignorable="d"
         Title="Embedded Network Lab" Height="800" Width="1000">
@@ -19,9 +21,12 @@
     <Window.Resources>
         <converters:BoolToBrushConverter x:Key="BoolToBrushConverter" TrueBrush="Green" FalseBrush="#333333"/>
 
+        <!-- Template for TCP Client views -->
         <DataTemplate DataType="{x:Type vmTcpClient:TcpClientViewModel}">
             <viewTcpClient:TcpClientView />
         </DataTemplate>
+
+        <!-- Template for MQTT Broker views -->
         <DataTemplate DataType="{x:Type vmMqtt:MqttBrokerViewModel}">
             <viewMqtt:MqttBrokerView />
         </DataTemplate>
@@ -35,6 +40,17 @@
         <DataTemplate DataType="{x:Type vmSimulator:SimulatorCentraleViewModel}">
             <viewSimulator:SimulatorCentraleView />
         </DataTemplate>
+
+        <!-- Template for TestingModuleUi -->
+        <DataTemplate DataType="{x:Type vmTestingModuleUi:TestingModuleUiViewModel}">
+            <viewTestingModuleUi:TestingModuleUi />
+        </DataTemplate>
+        
+
+
+
+
+
     </Window.Resources>
 
     <Grid>
@@ -87,6 +103,9 @@
                 
                 <TextBlock Text="Serial" FontWeight="SemiBold" Margin="0,5,0,5"/>
                 <Button Content="Commands" Margin="0,0,0,5" Command="{Binding OpenSerialCommandsCommand}"/>
+
+                <TextBlock Text="Test" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                <Button Content="Testing Module Ui" Margin="0,0,0,5" Command="{Binding OpenTestingModuleUiCommand}"/>
             </StackPanel>
         </Border>
 
