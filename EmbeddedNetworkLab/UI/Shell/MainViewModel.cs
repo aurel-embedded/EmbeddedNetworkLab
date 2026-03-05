@@ -9,6 +9,7 @@ using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
 using EmbeddedNetworkLab.UI.Modules.TcpClient;
 using EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2;
 using EmbeddedNetworkLab.UI.Windows;
+using EmbeddedNetworkLab;
 using System.Windows;
 
 namespace EmbeddedNetworkLab.UI.Shell
@@ -109,7 +110,11 @@ namespace EmbeddedNetworkLab.UI.Shell
 		[RelayCommand]
 		private void OpenSerialCommands()
 		{
-			var win = new SerialCommandsWindow
+			var configService = (Application.Current as App)?.AppConfigService;
+			if (configService is null) return;
+
+			var vm = new SerialCommandsViewModel(configService);
+			var win = new SerialCommandsWindow(vm)
 			{
 				Owner = Application.Current?.MainWindow
 			};

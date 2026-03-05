@@ -4,8 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EmbeddedNetworkLab.UI.Windows"
+        xmlns:converters="clr-namespace:EmbeddedNetworkLab.UI.Converters"
         mc:Ignorable="d"
-        Title="SerialCommandsWindow" Height="800" Width="700">
+        Title="SerialCommandsWindow" Height="800" Width="700"
+        Closed="Window_Closed">
+
+    <Window.Resources>
+        <converters:BoolToBrushConverter x:Key="ConnectedBrush" TrueBrush="Green" FalseBrush="Red"/>
+    </Window.Resources>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,8 +31,12 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,0,6"/>
-                    <TextBlock x:Name="ConnectionStatusText" Text="Disconnected" Foreground="Red" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusText}"
+                               Foreground="{Binding IsConnected, Converter={StaticResource ConnectedBrush}}"
+                               HorizontalAlignment="Center"/>
                 </Grid>
+
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -45,18 +56,19 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <ComboBox x:Name="PortComboBox"
-                                      MinWidth="200"
+                            <ComboBox MinWidth="200"
                                       Grid.Column="0"
                                       IsEditable="False"
+                                      ItemsSource="{Binding AvailablePorts}"
+                                      SelectedItem="{Binding SelectedPort}"
+                                      IsEnabled="{Binding IsNotConnected}"
                                       ToolTip="Select a serial port" />
 
-                            <Button x:Name="RefreshPortsButton"
-                                    Grid.Column="1"
-                                    Width="34"
-                                    Height="26"
+                            <Button Grid.Column="1"
+                                    Width="34" Height="26"
                                     Margin="8,0,0,0"
-                                    Click="RefreshPortsButton_Click"
+                                    Command="{Binding RefreshPortsCommand}"
+                                    IsEnabled="{Binding IsNotConnected}"
                                     ToolTip="Refresh COM ports"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
@@ -65,26 +77,24 @@
                             </Button>
                         </Grid>
 
-                        <ComboBox x:Name="BaudrateComboBox" MinWidth="200"
+                        <ComboBox MinWidth="200"
                                   IsEditable="False"
-                                  ToolTip="Select baud rate">
-                            <ComboBoxItem>460800</ComboBoxItem>
-                            <ComboBoxItem>115200</ComboBoxItem>
-                            <ComboBoxItem>57600</ComboBoxItem>
-                            <ComboBoxItem>38400</ComboBoxItem>
-                            <ComboBoxItem>19200</ComboBoxItem>
-                            <ComboBoxItem>9600</ComboBoxItem>
-                        </ComboBox>
+                                  ItemsSource="{Binding AvailableBaudRates}"
+                                  SelectedItem="{Binding SelectedBaudRate}"
+                                  IsEnabled="{Binding IsNotConnected}"
+                                  ToolTip="Select baud rate" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Right">
-                        <Button x:Name="ConnectButton" Content="Open" Width="90" Margin="8,0,0,6" Click="ConnectButton_Click"/>
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                        <Button Content="{Binding ConnectButtonLabel}"
+                                Width="90" Margin="8,0,0,6"
+                                Command="{Binding ConnectCommand}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>
         </Border>
 
-        <!-- Command section: 10 rows Name + Value + Send -->
+        <!-- Command section -->
         <Border Grid.Row="1" Padding="8" Margin="0,0,0,8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
             <StackPanel>
                 <Grid Margin="0,0,0,8">
@@ -94,74 +104,30 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Commande" FontWeight="Bold" Grid.Column="0" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="LoadCommandsButton" Content="Load" Width="80" Margin="0,0,8,0" Click="LoadCommandsButton_Click" ToolTip="Load name/value pairs from JSON" />
-                        <Button x:Name="SaveCommandsButton" Content="Save" Width="80" Click="SaveCommandsButton_Click" ToolTip="Save name/value pairs to JSON" />
+                        <Button Content="Load" Width="80" Margin="0,0,8,0"
+                                Command="{Binding LoadCommandsCommand}"
+                                ToolTip="Load name/value pairs from JSON" />
+                        <Button Content="Save" Width="80"
+                                Command="{Binding SaveCommandsCommand}"
+                                ToolTip="Save name/value pairs to JSON" />
                     </StackPanel>
                 </Grid>
+
                 <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="360">
-                    <UniformGrid Columns="1" Rows="10" Margin="0" IsItemsHost="False">
-                        <!-- Generate 10 rows manually -->
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <!-- Removed PlaceholderText property, added ToolTip for hint -->
-                            <TextBox x:Name="NameTextBox1" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 1"/>
-                            <TextBox x:Name="ValueTextBox1" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton1" Content="Send" Width="64" Click="SendRowButton_Click" Tag="1" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox2" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 2"/>
-                            <TextBox x:Name="ValueTextBox2" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton2" Content="Send" Width="64" Click="SendRowButton_Click" Tag="2" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox3" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 3"/>
-                            <TextBox x:Name="ValueTextBox3" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton3" Content="Send" Width="64" Click="SendRowButton_Click" Tag="3" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox4" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 4"/>
-                            <TextBox x:Name="ValueTextBox4" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton4" Content="Send" Width="64" Click="SendRowButton_Click" Tag="4" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox5" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 5"/>
-                            <TextBox x:Name="ValueTextBox5" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton5" Content="Send" Width="64" Click="SendRowButton_Click" Tag="5" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox6" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 6"/>
-                            <TextBox x:Name="ValueTextBox6" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton6" Content="Send" Width="64" Click="SendRowButton_Click" Tag="6" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox7" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 7"/>
-                            <TextBox x:Name="ValueTextBox7" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton7" Content="Send" Width="64" Click="SendRowButton_Click" Tag="7" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox8" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 8"/>
-                            <TextBox x:Name="ValueTextBox8" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton8" Content="Send" Width="64" Click="SendRowButton_Click" Tag="8" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox9" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 9"/>
-                            <TextBox x:Name="ValueTextBox9" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton9" Content="Send" Width="64" Click="SendRowButton_Click" Tag="9" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,4">
-                            <TextBox x:Name="NameTextBox10" MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Name 10"/>
-                            <TextBox x:Name="ValueTextBox10" MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <Button x:Name="SendRowButton10" Content="Send" Width="64" Click="SendRowButton_Click" Tag="10" />
-                        </StackPanel>
-                    </UniformGrid>
+                    <ItemsControl ItemsSource="{Binding Commands}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:SerialCommandRowViewModel}">
+                                <StackPanel Orientation="Horizontal" Margin="0,4">
+                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                             MinWidth="140" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                             MinWidth="260" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <Button Content="Send" Width="64"
+                                            Command="{Binding SendCommand}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </ScrollViewer>
             </StackPanel>
         </Border>
@@ -173,11 +139,11 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-    
+
                 <TextBlock Text="Reception" FontWeight="Bold" Margin="0,0,0,8" />
 
-                <TextBox x:Name="ReceptionTextBox"
-                         Grid.Row="1"
+                <TextBox Grid.Row="1"
+                         Text="{Binding ReceptionText, Mode=OneWay}"
                          IsReadOnly="True"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
