@@ -3,12 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core;
 using EmbeddedNetworkLab.Infrastructure.Services;
 using EmbeddedNetworkLab.Modules;
-using EmbeddedNetworkLab.UI.Modules.LiveCharts2;
 using EmbeddedNetworkLab.UI.Modules.MqttBroker;
 using EmbeddedNetworkLab.UI.Modules.Serial;
 using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
 using EmbeddedNetworkLab.UI.Modules.TcpClient;
-using EmbeddedNetworkLab.UI.Modules.TestingModuleUi;
+using EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2;
 using EmbeddedNetworkLab.UI.Windows;
 using System.Windows;
 

@@ -12,8 +12,8 @@
         xmlns:viewSerial="clr-namespace:EmbeddedNetworkLab.UI.Modules.Serial"
         xmlns:vmSimulator="clr-namespace:EmbeddedNetworkLab.UI.Modules.SimulatorCentrale"
         xmlns:viewSimulator="clr-namespace:EmbeddedNetworkLab.UI.Modules.SimulatorCentrale"
-        xmlns:vmTestingModuleUi="clr-namespace:EmbeddedNetworkLab.UI.Modules.TestingModuleUi"
-        xmlns:viewTestingModuleUi="clr-namespace:EmbeddedNetworkLab.UI.Modules.TestingModuleUi"
+        xmlns:vmLiveCharts2="clr-namespace:EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2"
+        xmlns:viewLiveCharts2="clr-namespace:EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2"
         xmlns:converters="clr-namespace:EmbeddedNetworkLab.UI.Converters"
         mc:Ignorable="d"
         Title="Embedded Network Lab - Aurelien PAJADON" Height="800" Width="1000">
