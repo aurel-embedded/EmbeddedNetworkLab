@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ffprobe -v quiet -print_format json -show_streams \"c:/_perso/dev/EmbeddedNetworkLab/EmbeddedNetworkLab/_res/film_newcarir.mp4\")",
+      "Bash(ffprobe -v quiet -print_format json -show_streams \"c:/_perso/dev/EmbeddedNetworkLab/EmbeddedNetworkLab/_res/test.mp4\")"
+    ]
+  }
+}

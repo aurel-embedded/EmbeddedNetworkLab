@@ -8,6 +8,7 @@ using EmbeddedNetworkLab.UI.Modules.Serial;
 using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
 using EmbeddedNetworkLab.UI.Modules.TcpClient;
 using EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2;
+using EmbeddedNetworkLab.UI.Modules.HttpServer;
 using EmbeddedNetworkLab.UI.Windows;
 using EmbeddedNetworkLab;
 using System.Windows;
@@ -19,6 +20,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 		// Services injected via constructor
 		private readonly ITcpThroughputService _tcpClientService;
 		private readonly IMqttBrokerService _mqttBrokerService;
+		private readonly IHttpServerService _httpServerService;
 		private readonly ITcpReachabilityService _tcpReachabilityService = new TcpReachabilityService();
 
 		// concrete instances kept for wiring module-specific events
@@ -26,6 +28,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 		private readonly MqttBrokerViewModel _mqttBrokerModuleInstance;
 		private readonly SimulatorCentraleViewModel _simulatorCentraleModuleInstance;
 		private readonly LiveCharts2ViewModel _testLiveCharts2Instance;
+		private readonly HttpServerViewModel _httpServerModuleInstance;
 
 		// Exposed bindable module properties (for XAML bindings)
 		[ObservableProperty]
@@ -39,6 +42,9 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 		[ObservableProperty]
 		private IModule liveCharts2Module;
+
+		[ObservableProperty]
+		private IModule httpServerModule;
 
 		private readonly SerialViewModel _leftSerialModel;
 
@@ -58,6 +64,10 @@ namespace EmbeddedNetworkLab.UI.Shell
 
 			_testLiveCharts2Instance = new LiveCharts2ViewModel();
 			LiveCharts2Module = _testLiveCharts2Instance;
+
+			_httpServerService = new HttpServerService();
+			_httpServerModuleInstance = new HttpServerViewModel(_httpServerService);
+			HttpServerModule = _httpServerModuleInstance;
 
 			// Subscribe simulator logs to the shell console, include module name
 			_simulatorCentraleModuleInstance.LogEmitted += (s, msg) =>
@@ -120,6 +130,13 @@ namespace EmbeddedNetworkLab.UI.Shell
 			};
 			win.Show();
 			AppendLog("opened", "SerialCommandsWindow");
+		}
+
+		[RelayCommand]
+		private void OpenHttpServer()
+		{
+			CurrentModule = _httpServerModuleInstance;
+			AppendLog("selected", _httpServerModuleInstance.Name);
 		}
 
 		[RelayCommand]
