@@ -5,8 +5,6 @@ VisualStudioVersion = 17.14.36908.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedNetworkLab", "EmbeddedNetworkLab\EmbeddedNetworkLab.csproj", "{69440BFC-4D1D-45C2-9BCF-0E30B739F8D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "..\ConsoleApp1\ConsoleApp1.csproj", "{FF673C7B-140F-4E77-BEDD-CEA775170D0C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,18 +27,6 @@ Global
 		{69440BFC-4D1D-45C2-9BCF-0E30B739F8D8}.Release|x64.Build.0 = Release|Any CPU
 		{69440BFC-4D1D-45C2-9BCF-0E30B739F8D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{69440BFC-4D1D-45C2-9BCF-0E30B739F8D8}.Release|x86.Build.0 = Release|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Debug|x64.Build.0 = Debug|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Debug|x86.Build.0 = Debug|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Release|x64.ActiveCfg = Release|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Release|x64.Build.0 = Release|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Release|x86.ActiveCfg = Release|Any CPU
-		{FF673C7B-140F-4E77-BEDD-CEA775170D0C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core;
+using EmbeddedNetworkLab.Core.Models;
 using EmbeddedNetworkLab.UI.Modules;
+using EmbeddedNetworkLab.UI.Windows;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,7 +20,7 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 		public override string Name => "HTTP Server";
 
 		public ObservableCollection<string> NetworkInterfaces { get; } = new();
-		public ObservableCollection<string> RequestLog { get; } = new();
+		public ObservableCollection<ReceivedVideoViewModel> Videos { get; } = new();
 		public ObservableCollection<string> EventLog { get; } = new();
 
 		[ObservableProperty]
@@ -42,8 +44,9 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 		{
 			_service = service;
 
-			_service.RequestReceived += (_, msg) =>
-				Application.Current.Dispatcher.Invoke(() => RequestLog.Insert(0, msg));
+			_service.VideoReceived += (_, video) =>
+				Application.Current.Dispatcher.Invoke(() =>
+					Videos.Insert(0, new ReceivedVideoViewModel(video, OnPlayVideo)));
 
 			_service.ServerEventTriggered += (_, msg) =>
 				Application.Current.Dispatcher.Invoke(() => EventLog.Insert(0, msg));
@@ -84,10 +87,19 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 		private bool CanStop() => IsRunning;
 
 		[RelayCommand]
-		private void ClearRequestLog() => RequestLog.Clear();
+		private void ClearVideos() => Videos.Clear();
 
 		[RelayCommand]
 		private void ClearEventLog() => EventLog.Clear();
+
+		private void OnPlayVideo(ReceivedVideoViewModel vm)
+		{
+			var win = new VideoPlayerWindow(vm.Video.FilePath, vm.FileName)
+			{
+				Owner = Application.Current.MainWindow
+			};
+			win.Show();
+		}
 
 		protected override void OnRunningStateChanged(bool isRunning)
 		{

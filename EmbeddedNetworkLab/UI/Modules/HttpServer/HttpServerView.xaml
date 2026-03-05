@@ -96,7 +96,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Request Log -->
+            <!-- Received Videos -->
             <Border Grid.Column="0" Padding="8" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Background="White">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -104,15 +104,37 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0" Margin="0,0,0,6">
-                        <TextBlock Text="Requests" FontWeight="Bold"/>
+                        <TextBlock Text="Received Videos" FontWeight="Bold"/>
                         <Button HorizontalAlignment="Right" Content="Clear" Width="50" Height="20" FontSize="11"
-                                Command="{Binding ClearRequestLogCommand}"/>
+                                Command="{Binding ClearVideosCommand}"/>
                     </Grid>
-                    <ListBox Grid.Row="1"
-                             ItemsSource="{Binding RequestLog}"
-                             FontFamily="Consolas" FontSize="11"
-                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                             VirtualizingPanel.IsVirtualizing="True"/>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Videos}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="4,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="130"/>
+                                                <ColumnDefinition Width="32"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding FileName}"
+                                                       FontFamily="Consolas" FontSize="12"
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding ReceivedAt}"
+                                                       FontSize="11" Foreground="#888"
+                                                       VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="&#9654;" Width="28" Height="24"
+                                                    FontSize="12"
+                                                    ToolTip="Play"
+                                                    Command="{Binding PlayCommand}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
             </Border>
 
