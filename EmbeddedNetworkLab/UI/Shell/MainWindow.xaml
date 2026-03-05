@@ -14,6 +14,8 @@
         xmlns:viewSimulator="clr-namespace:EmbeddedNetworkLab.UI.Modules.SimulatorCentrale"
         xmlns:vmLiveCharts2="clr-namespace:EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2"
         xmlns:viewLiveCharts2="clr-namespace:EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2"
+        xmlns:vmHttp="clr-namespace:EmbeddedNetworkLab.UI.Modules.HttpServer"
+        xmlns:viewHttp="clr-namespace:EmbeddedNetworkLab.UI.Modules.HttpServer"
         xmlns:converters="clr-namespace:EmbeddedNetworkLab.UI.Converters"
         mc:Ignorable="d"
         Title="Embedded Network Lab - Aurelien PAJADON" Height="800" Width="1000">
@@ -44,6 +46,11 @@
         <!-- Template for LiveCharts2 -->
         <DataTemplate DataType="{x:Type vmLiveCharts2:LiveCharts2ViewModel}">
             <viewLiveCharts2:LiveCharts2View />
+        </DataTemplate>
+
+        <!-- Template for HTTP Server -->
+        <DataTemplate DataType="{x:Type vmHttp:HttpServerViewModel}">
+            <viewHttp:HttpServerView />
         </DataTemplate>
         
 
@@ -101,6 +108,15 @@
                     </StackPanel>
                 </Button>
                 
+                <TextBlock Text="HTTP" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                <Button Margin="0,0,0,10" Command="{Binding OpenHttpServerCommand}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Server" VerticalAlignment="Center"/>
+                        <Ellipse Width="12" Height="12" Margin="8,0,0,0" VerticalAlignment="Center"
+                                 Fill="{Binding HttpServerModule.IsRunning, Converter={StaticResource BoolToBrushConverter}}"/>
+                    </StackPanel>
+                </Button>
+
                 <TextBlock Text="Serial" FontWeight="SemiBold" Margin="0,5,0,5"/>
                 <Button Content="Commands" Margin="0,0,0,5" Command="{Binding OpenSerialCommandsCommand}"/>
 
