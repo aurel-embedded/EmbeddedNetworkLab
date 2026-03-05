@@ -9,12 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace EmbeddedNetworkLab.UI.Modules.TestingModuleUi
+namespace EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2
 {
-	partial class TestingModuleUiViewModel : ModuleViewModel
+	partial class LiveCharts2ViewModel : ModuleViewModel
 	{
 
-		public override string Name => "Testing Module";
+		public override string Name => "LiveCharts2";
 
 		const int MaxPoints = 200;
 		public ObservableCollection<ObservablePoint> Points { get; } = new();
@@ -27,7 +27,7 @@ namespace EmbeddedNetworkLab.UI.Modules.TestingModuleUi
 		private double _t;
 		private double _x;
 
-		public TestingModuleUiViewModel()
+		public LiveCharts2ViewModel()
 		{
 			Series =
 			[

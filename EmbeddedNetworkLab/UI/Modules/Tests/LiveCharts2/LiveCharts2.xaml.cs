@@ -15,14 +15,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace EmbeddedNetworkLab.UI.Modules.TestingModuleUi
+namespace EmbeddedNetworkLab.UI.Modules.Tests.LiveCharts2
 {
 	/// <summary>
-	/// Interaction logic for TestingModuleUi.xaml
+	/// Interaction logic for LiveCharts2View.xaml
 	/// </summary>
-	public partial class TestingModuleUi : UserControl
+	public partial class LiveCharts2View : UserControl
 	{
-		public TestingModuleUi()
+		public LiveCharts2View()
 		{
 			InitializeComponent();
 		}

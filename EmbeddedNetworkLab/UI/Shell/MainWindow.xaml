@@ -41,9 +41,9 @@
             <viewSimulator:SimulatorCentraleView />
         </DataTemplate>
 
-        <!-- Template for TestingModuleUi -->
-        <DataTemplate DataType="{x:Type vmTestingModuleUi:TestingModuleUiViewModel}">
-            <viewTestingModuleUi:TestingModuleUi />
+        <!-- Template for LiveCharts2 -->
+        <DataTemplate DataType="{x:Type vmLiveCharts2:LiveCharts2ViewModel}">
+            <viewLiveCharts2:LiveCharts2View />
         </DataTemplate>
         
 
@@ -105,7 +105,7 @@
                 <Button Content="Commands" Margin="0,0,0,5" Command="{Binding OpenSerialCommandsCommand}"/>
 
                 <TextBlock Text="Test" FontWeight="SemiBold" Margin="0,5,0,5"/>
-                <Button Content="Testing Module Ui" Margin="0,0,0,5" Command="{Binding OpenTestingModuleUiCommand}"/>
+                <Button Content="LiveCharts2" Margin="0,0,0,5" Command="{Binding OpenTestsLiveCharts2Command}"/>
             </StackPanel>
         </Border>
 

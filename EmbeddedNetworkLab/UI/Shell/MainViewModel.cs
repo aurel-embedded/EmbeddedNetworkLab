@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using EmbeddedNetworkLab.Core;
 using EmbeddedNetworkLab.Infrastructure.Services;
 using EmbeddedNetworkLab.Modules;
+using EmbeddedNetworkLab.UI.Modules.LiveCharts2;
 using EmbeddedNetworkLab.UI.Modules.MqttBroker;
 using EmbeddedNetworkLab.UI.Modules.Serial;
 using EmbeddedNetworkLab.UI.Modules.SimulatorCentrale;
@@ -24,7 +25,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 		private readonly TcpClientViewModel _tcpClientModuleInstance;
 		private readonly MqttBrokerViewModel _mqttBrokerModuleInstance;
 		private readonly SimulatorCentraleViewModel _simulatorCentraleModuleInstance;
-		private readonly TestingModuleUiViewModel _testingModuleInstance;
+		private readonly LiveCharts2ViewModel _testLiveCharts2Instance;
 
 		// Exposed bindable module properties (for XAML bindings)
 		[ObservableProperty]
@@ -37,7 +38,7 @@ namespace EmbeddedNetworkLab.UI.Shell
 		private IModule simulatorCentraleModule;
 
 		[ObservableProperty]
-		private IModule testingModule;
+		private IModule liveCharts2Module;
 
 		private readonly SerialViewModel _leftSerialModel;
 
@@ -55,8 +56,8 @@ namespace EmbeddedNetworkLab.UI.Shell
 			_simulatorCentraleModuleInstance = new SimulatorCentraleViewModel();
 			SimulatorCentraleModule = _simulatorCentraleModuleInstance;
 
-			_testingModuleInstance = new TestingModuleUiViewModel();
-			TestingModule = _testingModuleInstance;
+			_testLiveCharts2Instance = new LiveCharts2ViewModel();
+			LiveCharts2Module = _testLiveCharts2Instance;
 
 			// Subscribe simulator logs to the shell console, include module name
 			_simulatorCentraleModuleInstance.LogEmitted += (s, msg) =>
@@ -118,10 +119,10 @@ namespace EmbeddedNetworkLab.UI.Shell
 		}
 
 		[RelayCommand]
-		private void OpenTestingModuleUi()
+		private void OpenTestsLiveCharts2()
 		{
-			CurrentModule = _testingModuleInstance;
-			AppendLog("selected", _testingModuleInstance.Name);
+			CurrentModule = _testLiveCharts2Instance;
+			AppendLog("selected", _testLiveCharts2Instance.Name);
 		}
 
 		// Method to append log messages to the console (adds its own timestamp).
