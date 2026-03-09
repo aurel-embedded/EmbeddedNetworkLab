@@ -12,7 +12,10 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 			{
 				if (e.NewValue is HttpServerViewModel vm)
 					((INotifyCollectionChanged)vm.EventLog).CollectionChanged += (_, _) =>
-						EventLogList.ScrollIntoView(EventLogList.Items[EventLogList.Items.Count - 1]);
+					{
+						if(EventLogList.Items.Count > 0)
+							EventLogList.ScrollIntoView(EventLogList.Items[EventLogList.Items.Count - 1]);
+					};
 			};
 		}
 	}
