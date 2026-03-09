@@ -24,6 +24,10 @@
         <!-- Workspace panel brushes-->
         <SolidColorBrush x:Key="WorkspaceBackgroundBrush" Color="#F6FFF8" />
 
+        <!-- Accent brushes -->
+        <SolidColorBrush x:Key="SuccessBrush" Color="#2E7D32" />
+        <SolidColorBrush x:Key="ErrorBrush" Color="#D32F2F" />
+
         <!-- Global Button style / template -->
         <Style TargetType="Button">
             <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
