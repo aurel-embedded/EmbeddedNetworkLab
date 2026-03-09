@@ -194,9 +194,6 @@ namespace EmbeddedNetworkLab.Infrastructure.Services
 
 					UploadProgressChanged?.Invoke(this,
 						new UploadProgress(totalRead, expected, percent));
-
-					ServerEventTriggered?.Invoke(this,
-						$"[{DateTime.Now:HH:mm:ss}] [UPLOAD PROGRESS] {percent:F1}% ({totalRead}/{expected})");
 				}
 				else
 				{

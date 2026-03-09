@@ -38,6 +38,9 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 		[ObservableProperty]
 		private string serverStatus = "Stopped";
 
+		[ObservableProperty]
+		private double uploadProgress = 0.0;
+
 		public bool IsConfigurationEditable => !IsRunning;
 
 		public HttpServerViewModel(IHttpServerService service)
@@ -54,7 +57,7 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 
 			_service.UploadProgressChanged += (_, progress) =>
 				Application.Current.Dispatcher.Invoke(() =>
-					AppendToLog($"[UPLOAD] {progress.Percent:F1}% ({progress.BytesReceived}/{progress.TotalBytes})"));
+					UploadProgress = progress.Percent);
 
 			LoadNetworkInterfaces();
 		}
