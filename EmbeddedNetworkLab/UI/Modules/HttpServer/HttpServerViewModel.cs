@@ -49,7 +49,12 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 					Videos.Insert(0, new ReceivedVideoViewModel(video, OnPlayVideo)));
 
 			_service.ServerEventTriggered += (_, msg) =>
-				Application.Current.Dispatcher.Invoke(() => AppendToLog(msg));
+				Application.Current.Dispatcher.Invoke(() => 
+					AppendToLog(msg));
+
+			_service.UploadProgressChanged += (_, progress) =>
+				Application.Current.Dispatcher.Invoke(() =>
+					AppendToLog($"[UPLOAD] {progress.Percent:F1}% ({progress.BytesReceived}/{progress.TotalBytes})"));
 
 			LoadNetworkInterfaces();
 		}

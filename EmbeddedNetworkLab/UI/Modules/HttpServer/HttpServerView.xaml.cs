@@ -8,14 +8,29 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 		public HttpServerView()
 		{
 			InitializeComponent();
+			NotifyCollectionChangedEventHandler? handler = null;
+			HttpServerViewModel? prevVm = null;
+
 			DataContextChanged += (_, e) =>
 			{
-				if (e.NewValue is HttpServerViewModel vm)
-					((INotifyCollectionChanged)vm.EventLog).CollectionChanged += (_, _) =>
+				if (prevVm is not null)
+					((INotifyCollectionChanged)prevVm.EventLog).CollectionChanged -= handler;
+
+				prevVm = e.NewValue as HttpServerViewModel;
+
+				if (prevVm is not null)
+				{
+					handler = (_, _) =>
 					{
-						if(EventLogList.Items.Count > 0)
-							EventLogList.ScrollIntoView(EventLogList.Items[EventLogList.Items.Count - 1]);
+						// Schedule after the ItemsControl has processed the change
+						Dispatcher.BeginInvoke(new Action(() =>
+						{
+							if (EventLogList.Items.Count > 0)
+								EventLogList.ScrollIntoView(EventLogList.Items[^1]);
+						}), System.Windows.Threading.DispatcherPriority.Background);
 					};
+					((INotifyCollectionChanged)prevVm.EventLog).CollectionChanged += handler;
+				}
 			};
 		}
 	}
