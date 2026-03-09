@@ -4,6 +4,51 @@
              xmlns:local="clr-namespace:EmbeddedNetworkLab"
              StartupUri="UI/Shell/MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Blue theme brushes -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#1976D2" />        <!-- default button -->
+        <SolidColorBrush x:Key="PrimaryLightBrush" Color="#42A5F5" />   <!-- hover -->
+        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#0D47A1" />    <!-- pressed -->
+        <SolidColorBrush x:Key="DisabledBrush" Color="#9E9E9E" />
+
+        <!-- Navigation panel brushes -->
+        <SolidColorBrush x:Key="NavBackgroundBrush" Color="#90caf9" />
+        <SolidColorBrush x:Key="NavBorderBrush" Color="#BBDEFB" />
+        
+        <!-- Workspace panel brushes-->
+        <SolidColorBrush x:Key="WorkspaceBackgroundBrush" Color="#E3F2FD" />
+
+        <!-- Global Button style / template -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource DisabledBrush}"/>
+                                <Setter Property="Foreground" Value="#EEEEEE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>
