@@ -18,7 +18,7 @@
         xmlns:viewHttp="clr-namespace:EmbeddedNetworkLab.UI.Modules.HttpServer"
         xmlns:converters="clr-namespace:EmbeddedNetworkLab.UI.Converters"
         mc:Ignorable="d"
-        Title="Embedded Network Lab - Aurelien PAJADON" Height="800" Width="1000">
+        Title="Embedded Network Lab - Aurelien PAJADON" Height="800" Width="1000" Icon="/UI/Shell/EmbeddedLab8.png">
 
     <Window.Resources>
         <converters:BoolToBrushConverter x:Key="BoolToBrushConverter" TrueBrush="Green" FalseBrush="#333333"/>

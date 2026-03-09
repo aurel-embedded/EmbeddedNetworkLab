@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="UI\Shell\EmbeddedLab1.png" />
+    <None Remove="UI\Shell\EmbeddedLab5.png" />
+    <None Remove="UI\Shell\EmbeddedLab6.png" />
+    <None Remove="UI\Shell\EmbeddedLab8.png" />
+    <None Remove="_res\EmbeddedLab.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
@@ -23,6 +31,16 @@
     <PackageReference Include="MQTTnet.Server" Version="5.1.0.1559" />
     <PackageReference Include="System.IO.Ports" Version="10.0.3" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.23" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="UI\Shell\EmbeddedLab1.png" />
+    <Resource Include="UI\Shell\EmbeddedLab5.png" />
+    <Resource Include="UI\Shell\EmbeddedLab6.png" />
+    <Resource Include="UI\Shell\EmbeddedLab8.png" />
+    <Resource Include="_res\EmbeddedLab.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
