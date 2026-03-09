@@ -38,6 +38,9 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 		[ObservableProperty]
 		private string serverStatus = "Stopped";
 
+		[ObservableProperty]
+		private double uploadProgress = 0.0;
+
 		public bool IsConfigurationEditable => !IsRunning;
 
 		public HttpServerViewModel(IHttpServerService service)
@@ -49,7 +52,12 @@ namespace EmbeddedNetworkLab.UI.Modules.HttpServer
 					Videos.Insert(0, new ReceivedVideoViewModel(video, OnPlayVideo)));
 
 			_service.ServerEventTriggered += (_, msg) =>
-				Application.Current.Dispatcher.Invoke(() => AppendToLog(msg));
+				Application.Current.Dispatcher.Invoke(() => 
+					AppendToLog(msg));
+
+			_service.UploadProgressChanged += (_, progress) =>
+				Application.Current.Dispatcher.Invoke(() =>
+					UploadProgress = progress.Percent);
 
 			LoadNetworkInterfaces();
 		}

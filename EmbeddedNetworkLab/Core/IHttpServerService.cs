@@ -13,5 +13,6 @@ namespace EmbeddedNetworkLab.Core
 		event EventHandler<string>? RequestReceived;
 		event EventHandler<string>? ServerEventTriggered;
 		event EventHandler<ReceivedVideo>? VideoReceived;
+		event EventHandler<UploadProgress>? UploadProgressChanged;
 	}
 }
