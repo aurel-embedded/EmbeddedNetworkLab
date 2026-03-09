@@ -34,9 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="UI\Shell\EmbeddedLab1.png" />
-    <Resource Include="UI\Shell\EmbeddedLab5.png" />
-    <Resource Include="UI\Shell\EmbeddedLab6.png" />
     <Resource Include="UI\Shell\EmbeddedLab8.png" />
     <Resource Include="_res\EmbeddedLab.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
