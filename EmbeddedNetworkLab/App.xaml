@@ -4,18 +4,25 @@
              xmlns:local="clr-namespace:EmbeddedNetworkLab"
              StartupUri="UI/Shell/MainWindow.xaml">
     <Application.Resources>
-        <!-- Blue theme brushes -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#1976D2" />        <!-- default button -->
-        <SolidColorBrush x:Key="PrimaryLightBrush" Color="#42A5F5" />   <!-- hover -->
-        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#0D47A1" />    <!-- pressed -->
-        <SolidColorBrush x:Key="DisabledBrush" Color="#9E9E9E" />
+        <!-- Palette centered around: 6B9080, A4C3B2, CCE3DE, EAF4F4, F6FFF8 -->
+        <SolidColorBrush x:Key="PalettePrimary" Color="#6B9080" />
+        <SolidColorBrush x:Key="PaletteSecondary" Color="#A4C3B2" />
+        <SolidColorBrush x:Key="PaletteTertiary" Color="#CCE3DE" />
+        <SolidColorBrush x:Key="PaletteQuaternary" Color="#EAF4F4" />
+        <SolidColorBrush x:Key="PaletteQuinary" Color="#F6FFF8" />
 
-        <!-- Navigation panel brushes -->
-        <SolidColorBrush x:Key="NavBackgroundBrush" Color="#90caf9" />
-        <SolidColorBrush x:Key="NavBorderBrush" Color="#BBDEFB" />
+        <!-- Map semantic brushes to the palette -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#6B9080" />        <!-- default button -->
+        <SolidColorBrush x:Key="PrimaryLightBrush" Color="#A4C3B2" />   <!-- hover -->
+        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#4F7866" />    <!-- pressed (slightly darker than primary) -->
+        <SolidColorBrush x:Key="DisabledBrush" Color="#CCE3DE" />
+
+        <!-- Navigation panel brushes (darker) -->
+        <SolidColorBrush x:Key="NavBackgroundBrush" Color="#CCE3DE" />
+        <SolidColorBrush x:Key="NavBorderBrush" Color="#A4C3B2" />
         
         <!-- Workspace panel brushes-->
-        <SolidColorBrush x:Key="WorkspaceBackgroundBrush" Color="#E3F2FD" />
+        <SolidColorBrush x:Key="WorkspaceBackgroundBrush" Color="#F6FFF8" />
 
         <!-- Global Button style / template -->
         <Style TargetType="Button">
