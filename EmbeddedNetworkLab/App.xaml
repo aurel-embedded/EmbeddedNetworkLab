@@ -4,25 +4,39 @@
              xmlns:local="clr-namespace:EmbeddedNetworkLab"
              StartupUri="UI/Shell/MainWindow.xaml">
     <Application.Resources>
-        <!-- Palette centered around: 6B9080, A4C3B2, CCE3DE, EAF4F4, F6FFF8 -->
-        <SolidColorBrush x:Key="PalettePrimary" Color="#6B9080" />
-        <SolidColorBrush x:Key="PaletteSecondary" Color="#A4C3B2" />
-        <SolidColorBrush x:Key="PaletteTertiary" Color="#CCE3DE" />
-        <SolidColorBrush x:Key="PaletteQuaternary" Color="#EAF4F4" />
-        <SolidColorBrush x:Key="PaletteQuinary" Color="#F6FFF8" />
+        <!-- Palette: dégradé de bleus -->
+        <SolidColorBrush x:Key="PalettePrimary" Color="#083D77" />
+        <SolidColorBrush x:Key="PaletteSecondary" Color="#2E85B7" />
+        <SolidColorBrush x:Key="PaletteTertiary" Color="#6FB3E0" />
+        <SolidColorBrush x:Key="PaletteQuaternary" Color="#E9F6FD" />
+        <SolidColorBrush x:Key="PaletteQuinary" Color="#FFFFFF" />
 
-        <!-- Map semantic brushes to the palette -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#6B9080" />        <!-- default button -->
-        <SolidColorBrush x:Key="PrimaryLightBrush" Color="#A4C3B2" />   <!-- hover -->
-        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#4F7866" />    <!-- pressed (slightly darker than primary) -->
-        <SolidColorBrush x:Key="DisabledBrush" Color="#CCE3DE" />
+        <!-- Primary brushes as dégradés -->
+        <LinearGradientBrush x:Key="PrimaryBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#0B4F8A" Offset="0" />
+            <GradientStop Color="#2E85B7" Offset="1" />
+        </LinearGradientBrush>
 
-        <!-- Navigation panel brushes (darker) -->
-        <SolidColorBrush x:Key="NavBackgroundBrush" Color="#CCE3DE" />
-        <SolidColorBrush x:Key="NavBorderBrush" Color="#A4C3B2" />
+        <LinearGradientBrush x:Key="PrimaryLightBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#4FA7DE" Offset="0" />
+            <GradientStop Color="#91D0F8" Offset="1" />
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#063859" />
+        <SolidColorBrush x:Key="DisabledBrush" Color="#BFDDEE" />
+
+        <!-- Navigation panel gradient (accentué, vertical) -->
+        <LinearGradientBrush x:Key="NavBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FF63B9FB" Offset="0" />
+            <GradientStop Color="#FF0D173C" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="NavBorderBrush" Color="#9EDCF8" />
         
-        <!-- Workspace panel brushes-->
-        <SolidColorBrush x:Key="WorkspaceBackgroundBrush" Color="#F6FFF8" />
+        <!-- Workspace subtle gradient (léger bleu) -->
+        <LinearGradientBrush x:Key="WorkspaceBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FFFFFF" Offset="0" />
+            <GradientStop Color="#FFDAECFD" Offset="1" />
+        </LinearGradientBrush>
 
         <!-- Accent brushes -->
         <SolidColorBrush x:Key="SuccessBrush" Color="#2E7D32" />
