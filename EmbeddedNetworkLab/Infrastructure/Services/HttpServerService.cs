@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -112,40 +113,186 @@ namespace EmbeddedNetworkLab.Infrastructure.Services
 			}
 		}
 
-		private async Task HandleMultipartUpload(HttpContext context)
+		// Standardized upload logging helpers
+		private void EmitUploadStart(string type, string fileName, string clientIp, long expected)
 		{
-			var form = await context.Request.ReadFormAsync();
-			var file = form.Files.FirstOrDefault();
-			if (file == null)
-			{
-				context.Response.StatusCode = 400;
-				await context.Response.WriteAsync("{\"error\":\"no file\"}");
-				return;
-			}
-
-			var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "?";
 			ServerEventTriggered?.Invoke(this,
-				$"[{DateTime.Now:HH:mm:ss}] [MULTIPART START] {file.FileName} from {clientIp}");
-
-			var saveDir = Path.Combine(AppContext.BaseDirectory, "received_videos");
-			Directory.CreateDirectory(saveDir);
-			var savePath = Path.Combine(saveDir, file.FileName);
-			using (var stream = File.Create(savePath))
-				await file.CopyToAsync(stream);
-
-			var receivedAt = DateTime.Now;
-			var video = new ReceivedVideo(file.FileName, savePath, receivedAt);
-			VideoReceived?.Invoke(this, video);
-
-			context.Response.ContentType = "application/json";
-			context.Response.StatusCode = 200;
-			await context.Response.WriteAsync("{\"status\":\"uploaded\"}");
-
-			var ts = receivedAt.ToString("HH:mm:ss");
-			var sizeKb = file.Length / 1024.0;
-			ServerEventTriggered?.Invoke(this, 
-				$"[{ts}] [UPLOAD] {file.FileName} — {sizeKb:F1} KB — from {clientIp} — saved to {savePath}");
+				$"[{DateTime.Now:HH:mm:ss}] [UPLOAD {type}] START {fileName} from {clientIp} size={expected} bytes");
 		}
+
+		private void EmitUploadDone(string type, string fileName, long totalBytes, TimeSpan duration, string clientIp, string savePath)
+		{
+			var rateMbps = (totalBytes * 8.0 / 1_000_000.0) / Math.Max(duration.TotalSeconds, 0.001);
+			ServerEventTriggered?.Invoke(this,
+				$"[{DateTime.Now:HH:mm:ss}] [UPLOAD {type}] DONE {fileName} {totalBytes} bytes in {duration.TotalSeconds:F2}s ({rateMbps:F2} Mbps) — from {clientIp} — saved to {savePath}");
+		}
+
+        private async Task HandleMultipartUpload(HttpContext context)
+        {
+            // Try to stream the multipart request so we can report progress while the body is being received.
+            // Fall back to the buffered approach if the content type is missing or not multipart.
+            var contentType = context.Request.ContentType;
+            if (string.IsNullOrEmpty(contentType) || !contentType.StartsWith("multipart/", StringComparison.OrdinalIgnoreCase))
+            {
+                // Fallback to previous buffered behavior
+                var form = await context.Request.ReadFormAsync();
+                var file = form.Files.FirstOrDefault();
+                if (file == null)
+                {
+                    context.Response.StatusCode = 400;
+                    await context.Response.WriteAsync("{\"error\":\"no file\"}");
+                    return;
+                }
+
+                var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "?";
+
+                var saveDir = Path.Combine(AppContext.BaseDirectory, "received_videos");
+                Directory.CreateDirectory(saveDir);
+                var savePath = Path.Combine(saveDir, file.FileName);
+
+                var expected = file.Length;
+                EmitUploadStart("MULTIPART", file.FileName, clientIp, expected);
+
+                var totalRead = 0L;
+                var buffer = new byte[8192];
+                var start = DateTime.UtcNow;
+
+                using (var input = file.OpenReadStream())
+                using (var fs = File.Create(savePath))
+                {
+                    while (true)
+                    {
+                        var read = await input.ReadAsync(buffer);
+                        if (read == 0) break;
+                        await fs.WriteAsync(buffer.AsMemory(0, read));
+                        totalRead += read;
+
+                        if (expected > 0)
+                        {
+                            var percent = (double)totalRead / expected * 100.0;
+                            UploadProgressChanged?.Invoke(this, new UploadProgress(totalRead, expected, percent));
+                        }
+                        else
+                        {
+                            ServerEventTriggered?.Invoke(this, $"[{DateTime.Now:HH:mm:ss}] [UPLOAD PROGRESS] {totalRead} bytes");
+                        }
+                    }
+                }
+
+                var duration = DateTime.UtcNow - start;
+                var receivedAt = DateTime.Now;
+                var video = new ReceivedVideo(file.FileName, savePath, receivedAt);
+                VideoReceived?.Invoke(this, video);
+
+                if (expected > 0)
+                {
+                    UploadProgressChanged?.Invoke(this, new UploadProgress(totalRead, expected, 100.0));
+                }
+
+                EmitUploadDone("MULTIPART", file.FileName, totalRead, duration, clientIp, savePath);
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 200;
+                await context.Response.WriteAsync("{\"status\":\"uploaded\"}");
+                return;
+            }
+
+            // Streamed multipart parsing
+            try
+            {
+                var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "?";
+                var saveDir = Path.Combine(AppContext.BaseDirectory, "received_videos");
+                Directory.CreateDirectory(saveDir);
+
+                // Extract boundary from content-type header (manual parse to avoid dependency on specific header types)
+                string? boundary = null;
+                var parts = contentType.Split(';');
+                foreach (var part in parts)
+                {
+                    var idx = part.IndexOf('=');
+                    if (idx <= 0) continue;
+                    var name = part.Substring(0, idx).Trim();
+                    var value = part.Substring(idx + 1).Trim().Trim('"');
+                    if (name.Equals("boundary", StringComparison.OrdinalIgnoreCase))
+                    {
+                        boundary = value;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(boundary))
+                {
+                    throw new InvalidOperationException("Missing multipart boundary");
+                }
+
+                var reader = new Microsoft.AspNetCore.WebUtilities.MultipartReader(boundary, context.Request.Body);
+
+                Microsoft.AspNetCore.WebUtilities.MultipartSection section;
+                while ((section = await reader.ReadNextSectionAsync()) != null)
+                {
+                    var hasContentDisposition = System.Net.Http.Headers.ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var cd);
+                    if (!hasContentDisposition) continue;
+
+                    // Is this a file section?
+                    if (cd.DispositionType.Equals("form-data") && (!string.IsNullOrEmpty(cd.FileName) || !string.IsNullOrEmpty(cd.FileNameStar)))
+                    {
+                        var rawFileName = cd.FileName ?? cd.FileNameStar;
+                        var fileName = rawFileName?.Trim('"');
+                        var savePath = Path.Combine(saveDir, fileName);
+
+                        var expected = context.Request.ContentLength ?? -1;
+                        EmitUploadStart("MULTIPART", fileName, clientIp, expected);
+
+                        var totalRead = 0L;
+                        var buffer = new byte[8192];
+                        var start = DateTime.UtcNow;
+
+                        using (var fs = File.Create(savePath))
+                        {
+                            while (true)
+                            {
+                                var read = await section.Body.ReadAsync(buffer);
+                                if (read == 0) break;
+                                await fs.WriteAsync(buffer.AsMemory(0, read));
+                                totalRead += read;
+
+                                if (expected > 0)
+                                {
+                                    var percent = (double)totalRead / expected * 100.0;
+                                    UploadProgressChanged?.Invoke(this, new UploadProgress(totalRead, expected, percent));
+                                }
+                                else
+                                {
+                                    ServerEventTriggered?.Invoke(this, $"[{DateTime.Now:HH:mm:ss}] [UPLOAD PROGRESS] {totalRead} bytes");
+                                }
+                            }
+                        }
+
+                        var duration = DateTime.UtcNow - start;
+                        var receivedAt = DateTime.Now;
+                        var video = new ReceivedVideo(fileName, savePath, receivedAt);
+                        VideoReceived?.Invoke(this, video);
+
+                        if (expected > 0)
+                        {
+                            UploadProgressChanged?.Invoke(this, new UploadProgress(totalRead, expected, 100.0));
+                        }
+
+                        EmitUploadDone("MULTIPART", fileName, totalRead, duration, clientIp, savePath);
+                    }
+                }
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 200;
+                await context.Response.WriteAsync("{\"status\":\"uploaded\"}");
+            }
+            catch (Exception ex)
+            {
+                ServerEventTriggered?.Invoke(this, $"[{DateTime.Now:HH:mm:ss}] [ERROR] Multipart handling failed: {ex.Message}");
+                context.Response.StatusCode = 500;
+                await context.Response.WriteAsync("{\"error\":\"multipart error\"}");
+            }
+        }
 
 		private async Task HandleRawUpload(HttpContext context)
 		{
@@ -173,8 +320,7 @@ namespace EmbeddedNetworkLab.Infrastructure.Services
 			ServerEventTriggered?.Invoke(this,
 				$"[{DateTime.Now:HH:mm:ss}] [UPLOAD HEADER] Content-Type={context.Request.ContentType} Length={expected}");
 
-			ServerEventTriggered?.Invoke(this,
-				$"[{DateTime.Now:HH:mm:ss}] [UPLOAD START] {fileName} from {clientIp} size={expected} bytes");
+			EmitUploadStart("RAW", fileName, clientIp, expected);
 
 			using var fs = File.Create(savePath);
 
@@ -191,7 +337,6 @@ namespace EmbeddedNetworkLab.Infrastructure.Services
 				if (expected > 0)
 				{
 					var percent = (double)totalRead / expected * 100.0;
-
 					UploadProgressChanged?.Invoke(this,
 						new UploadProgress(totalRead, expected, percent));
 				}
@@ -203,11 +348,9 @@ namespace EmbeddedNetworkLab.Infrastructure.Services
 
 			}
 
-			var duration = Math.Max((DateTime.UtcNow - start).TotalSeconds, 0.001); // Avoid division by zero
-			var rateMbps = (totalRead * 8.0 / 1_000_000.0) / duration;
+			var duration = DateTime.UtcNow - start;
 
-			ServerEventTriggered?.Invoke(this,
-				$"[{DateTime.Now:HH:mm:ss}] [UPLOAD DONE] {fileName} {totalRead} bytes in {duration:F2}s ({rateMbps:F2} Mbps)");
+			EmitUploadDone("RAW", fileName, totalRead, duration, clientIp, savePath);
 
 			VideoReceived?.Invoke(this,
 				new ReceivedVideo(fileName, savePath, DateTime.Now));
